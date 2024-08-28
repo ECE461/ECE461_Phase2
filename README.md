@@ -1,7 +1,7 @@
 # ECE-461-Team
 ECE 461 - package manager repository
 
-Maggie Committed
+Maggie Solinsky Committed 
 
 Saniya Committed
 
