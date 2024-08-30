@@ -1,0 +1,81 @@
+Project Description:
+
+Your team is a subcontractor for ACME Corporation, which operates the ACME Web Service.
+One of their back-end components was recently ported to Node.js to facilitate re-using software packages between the (Type/JavaScript) front-end and the (now-Type/JavaScript) back-end. Sofar, Node.js has been working well, and even seems to be helping ACME Corporation recruit new engineers.
+Based on the success so far, ACME Corporation’s software architects are considering bringing up new Node.js-based services. 
+Your team provides infrastructure services for ACME Corporation, and you are being asked to make it easy for the service teams to get started.
+You have been looking into npm, the package manager for Node.js, and are excited to see so many modules (over 2 million!). Your team’s contact at ACME Corporation, Sarah, is open to re-using these modules, but she is concerned about a few things:
+ She knows open-source documentation can be sparse, and wants to make sure it is
+relatively easy for their engineers to learn the new module (“low ramp-up time”).
+ She worries that an open-source module might be held to a low standard of correctness.2
+ She is concerned that an open-source module might not have enough maintainers to
+continue to apply critical fixes such as a security patch. This is her highest priority.
+ She wants to make sure that maintainers will be responsive to fix any bugs that are
+blocking ACME’s teams.
+ She said she might add some more qualities later, so your design should be able to
+accommodate adding new aspects.
+
+In addition to Sarah’s concerns, ACME Corporation currently offers its web service product directly via a REST API. However, she told you that in the three-year roadmap, they are exploring a licensed version of the web service that its customers can deploy internally: self-hosted ACME. 
+Some considerations:
+ In initial conversations, their prospective customers say that it will be important for self-
+hosted ACME to be open-source so that they can tailor it to their needs.
+ ACME Corporation uses the GNU Lesser General Public License v2.1 for all open-
+source software.
+ Any modules that ACME Corporation relies on could then be distributed as part of this product. Therefore, any open-source module’s licenses that ACME Corporation’s service engineers use must be compatible with the LGPLv2.1 license. You may suppose that the license description is given in one of two places: either in the project README, under a Markdown heading “License”, as in this example: https://github.com/nodejs/node#license (you might use a regex to parse); or as a separate file in the root directory named LICENSE.{extension}.
+Sarah has asked your contracting team to prepare a tool to help the ACME service engineering
+teams choose modules wisely. She suggested that you start with a command-line interface
+(Project Phase 1), get feedback, and then move to a web service (Project Phase 2). She says it
+would be nice if your tool is “not super slow”, and would appreciate some performance
+measurements. In addition, she prepared an initial specification. See the following for details.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Sarah’s initial project specification:
+System input
+ Should support input from command line arguments.
+
+System implementation
+ Should be majority TypeScript
+
+System output
+ Should print all output to the stdout (though this output mode might change in the future, so design accordingly).
+ Each repository should be accompanied by its overall score, as well as its sub-scores for “ramp-up time, “correctness”, “bus factor”, “responsiveness”, and “license compatibility”.
+
+Sarah’s other requirements:
+Sarah wants to know how long it will take your system to respond. Please select and justify some representative input projects to show the cost as the projects vary, e.g. in size.
+For better latency, Sarah wants each metric to be calculated in parallel, although she acknowledges that you may wish to consider the number of available cores when deciding on the level of parallelism.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Project Specifications:
+
+There should be an executable file in the root directory of your project. This file should be named "run".
+o NB: When I say that this file should be executable, I mean that means its
+permissions are set to executable. That does not mean it must be a compiled
+program. I guess it could be. But you can write it in whatever programming
+language you want. Just run “chmod +x run” on it to set its permissions to
+executable.
+ The file “run” should have the following CLI when executed on a Linux machine (note that you can use whatever CLI you want; you can then wrap that CLI within this auto-grader-friendly CLI):
+
+ “./run install”
+     Installs any dependencies in userland (e.g. pip install --user).
+     Should exit 0 on success, non-zero on failure
+
+ "./run URL_FILE", where URL_FILE is the absolute location of a file consisting of an ASCII-encoded newline-delimited set of URLs.
+     These URLs may be in the npmjs.com domain (e.g. https://www.npmjs.com/package/even) or come directly from GitHub (e.g. https://github.com/jonschlinkert/even).
+     This invocation should produce NDJSON output. Each row should include the fields: “URL”, “NetScore”, “NetScore_Latency”, “RampUp”, “RampUp_Latency”, “Correctness”, “Corectness_Latency”, “BusFactor”, 
+        “BusFactor_Latency”, “ResponsiveMaintainer”, “ResponsiveMaintainer_Latency”, “License”, and “License_Latency”.
+     Each score should be in the range [0,1] where 0 indicates total failure and 1 indicates perfection. The specific operationalizations are up to you; you must design and justify them in your report.
+     Latency values should reflect the time to calculate that component of the net score. Report values in seconds and round results to three decimal places (i.e., to the nearest millisecond).
+     The “NetScore” should be calculated as [0,1] as well, as a weighted sum. You should choose the weights based on Sarah’s priorities, and explain your choice.
+     Should exit 0 on success, non-zero on failure
+
+ "./run test", which runs a test suite and exits 0 if everything is working.
+     The minimum requirement for this test suite is that it contain at least 20 distinct test cases and achieve at least 80% code coverage as measured by line coverage.
+     The output from this invocation should be a line written to stdout of the form: “X/Y test cases passed. Z% line coverage achieved.”
+     Should exit 0 on success, non-zero on failure
+
+In the event of an error, your program should exit with return code 1, and print a useful error message to the console. Look at the resource on error message design for guidance.
+
+Your software must produce a log file stored in the location named in the environment variable3 $LOG_FILE and using the verbosity level indicated in the environment variable $LOG_LEVEL (0 means silent, 1 means informational messages, 2 means debug messages). Default log verbosity is 0
+
+
+
