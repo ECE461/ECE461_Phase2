@@ -1,0 +1,25 @@
+{
+  "name": "my-package-manager",
+  "version": "1.0.0",
+  "description": "A package manager that ranks packages based on various factors.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "commander": "^7.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "typescript": "^4.2.4",
+    "ts-node": "^9.1.1",
+    "eslint": "^7.23.0",
+    "prettier": "^2.2.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1"
+  }
+}
