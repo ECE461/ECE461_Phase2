@@ -3,11 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = require("commander");
 //import { URL } from 'url';
 var program = new commander_1.Command();
+// program metadata
 program
-    .version('0.0.1')
-    .command('url <url>')
+    .name('cli_parse')
+    .description('CLI program to parse URL and output measured metrics')
+    .version('0.0.1');
+program
+    //.command('url <url>')             // command to run i.e.  "node cli_parse.ts url <url>"
+    .arguments('<url>')
     .description('CLI program takes in URL of a package and outputs measured metrics')
-    // .argument('<url>', 'URL of the package')
     .action(function (urlString) {
     try {
         // Parse the URL
