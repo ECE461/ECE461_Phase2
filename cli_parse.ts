@@ -1,7 +1,12 @@
 import { Command } from 'commander';
-//import { URL } from 'url';
+import { URL } from 'url';
 
 const program = new Command();
+
+// site hostnames
+let hostNPM:string  = 'npm.com';
+let hostGITHUB:string  = 'github.com';
+
 
 // program metadata
 program
@@ -16,9 +21,16 @@ program
   .action((urlString: string) => {  
         try {
             // Parse the URL
-            const url = urlString;
-            console.log('URL: ', urlString);
+            const parsedUrl = new URL(urlString);
+
+            if (parsedUrl.hostname == hostNPM) {
+                
+            }
+            else if (parsedUrl.hostname == hostGITHUB) {
+
+            }
             /*
+            console.log('URL: ', urlString);
             console.log('Protocol:', parsedUrl.protocol);
             console.log('Host:', parsedUrl.host);
             console.log('Hostname:', parsedUrl.hostname);
@@ -27,6 +39,7 @@ program
             console.log('Search:', parsedUrl.search);
             console.log('Hash:', parsedUrl.hash);
             */
+            
         } catch (error) {
             console.error('Invalid URL:', error.message);
             process.exit(1);
