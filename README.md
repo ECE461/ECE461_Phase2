@@ -8,3 +8,10 @@ Saniya Garg committed
 Luke Ostrander Committed
 
 Aidan Dannhausen-Brun committed
+
+
+Dependencies
+Commander
+URL
+graphql
+graphql-request

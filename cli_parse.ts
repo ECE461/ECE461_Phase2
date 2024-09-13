@@ -4,9 +4,10 @@ import { URL } from 'url';
 const program = new Command();
 
 // site hostnames
+/*
 let hostNPM:string  = 'npm.com';
 let hostGITHUB:string  = 'github.com';
-
+*/
 
 // program metadata
 program
@@ -22,24 +23,18 @@ program
         try {
             // Parse the URL
             const parsedUrl = new URL(urlString);
-
-            if (parsedUrl.hostname == hostNPM) {
-                
-            }
-            else if (parsedUrl.hostname == hostGITHUB) {
-
-            }
-            /*
-            console.log('URL: ', urlString);
-            console.log('Protocol:', parsedUrl.protocol);
-            console.log('Host:', parsedUrl.host);
-            console.log('Hostname:', parsedUrl.hostname);
-            console.log('Port:', parsedUrl.port);
             console.log('Pathname:', parsedUrl.pathname);
-            console.log('Search:', parsedUrl.search);
-            console.log('Hash:', parsedUrl.hash);
-            */
             
+            // Extract owner and repository name
+            let pathParts = parsedUrl.pathname.split('/').filter(Boolean);
+            if (pathParts.length >= 2) {
+                const [owner, repoName] = pathParts;
+                console.log('Owner:', owner);
+                console.log('Repo Name:', repoName);
+            } else {
+                throw new Error('Invalid GitHub repository URL');
+            }
+
         } catch (error) {
             console.error('Invalid URL:', error.message);
             process.exit(1);
