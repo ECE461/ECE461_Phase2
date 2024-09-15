@@ -24,6 +24,7 @@ program
         var parsedUrl = new url_1.URL(urlString);
         // Extract owner and repository name and get metrics
         var Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
+        Metrics.getMetrics();
     }
     catch (error) {
         console.error('Invalid URL:', error.message);

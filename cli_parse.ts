@@ -26,7 +26,7 @@ program
             
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
-
+            Metrics.getMetrics();
         } catch (error) {
             console.error('Invalid URL:', error.message);
             process.exit(1);

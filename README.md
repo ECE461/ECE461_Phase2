@@ -13,5 +13,4 @@ Aidan Dannhausen-Brun committed
 Dependencies:
 Commander
 URL
-graphql
-graphql-request
+octokit/rest
