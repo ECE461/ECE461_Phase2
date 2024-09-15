@@ -22,9 +22,9 @@ export class license {
 
 
   /**
-   * getRepoLicense returns the license of the package
+   * getFileContent returns a boolean if the file contains LGPLv2.1
    * 
-   * @returns the content of the file path given or NULL if not found
+   * @returns 0 or 1 if the LGPLv2.1 is in the file
    */
   private async getFileContent(path: string) : Promise<string | null> {
     try {
@@ -36,7 +36,7 @@ export class license {
           }
         }
       );
-      return response.data.includes('MIT License');
+      return response.data.includes('LGPLv2.1');  
 
     } catch (error) {
       console.error(`Error when fetching file content in ${this.owner}/${this.repoName}: ${error}`);
@@ -52,18 +52,18 @@ export class license {
   async getRepoLicense() : Promise<number> {
     try {
       
-      // gets contents of LICENSE and README.md files
+      // gets booleans of LICENSE and README.md files
       const [licenseFile, readMeFile] = await Promise.all([
         this.getFileContent('LICENSE'),
         this.getFileContent('README.md')
       ]);
       
-      // checks if the files contain LGPLv2.1
+      // checks if one or the other contains LGPLv2.1
       if (licenseFile || readMeFile) {
-        console.log('License Found: LGPLv2.1');
+        //console.log('License Found: LGPLv2.1');
         return 1;
       }
-      console.log('License Not Found');
+      //console.log('License Not Found');
       return 0;
 
     } catch (error) {

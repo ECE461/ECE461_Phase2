@@ -37,12 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.license = void 0;
-//import { Octokit } from "@octokit/rest";
 var axios_1 = require("axios");
 var dotenv = require("dotenv");
 dotenv.config();
 var GITHUB_API = 'https://raw.githubusercontent.com';
-//const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 var license = /** @class */ (function () {
     /**
      * constructs a metrics manager for a GitHub repository
@@ -55,9 +53,9 @@ var license = /** @class */ (function () {
         this.repoName = repoName;
     }
     /**
-     * getRepoLicense returns the license of the package
+     * getFileContent returns a boolean if the file contains LGPLv2.1
      *
-     * @returns the content of the file path given or NULL if not found
+     * @returns 0 or 1 if the LGPLv2.1 is in the file
      */
     license.prototype.getFileContent = function (path) {
         return __awaiter(this, void 0, void 0, function () {
@@ -74,7 +72,7 @@ var license = /** @class */ (function () {
                             })];
                     case 1:
                         response = _a.sent();
-                        return [2 /*return*/, response.data.includes('MIT License')];
+                        return [2 /*return*/, response.data.includes('LGPLv2.1')];
                     case 2:
                         error_1 = _a.sent();
                         console.error("Error when fetching file content in ".concat(this.owner, "/").concat(this.repoName, ": ").concat(error_1));
@@ -102,12 +100,12 @@ var license = /** @class */ (function () {
                             ])];
                     case 1:
                         _a = _b.sent(), licenseFile = _a[0], readMeFile = _a[1];
-                        // checks if the files contain LGPLv2.1
+                        // checks if one or the other contains LGPLv2.1
                         if (licenseFile || readMeFile) {
-                            console.log('License Found: LGPLv2.1');
+                            //console.log('License Found: LGPLv2.1');
                             return [2 /*return*/, 1];
                         }
-                        console.log('License Not Found');
+                        //console.log('License Not Found');
                         return [2 /*return*/, 0];
                     case 2:
                         error_2 = _b.sent();

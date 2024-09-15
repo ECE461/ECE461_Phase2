@@ -39,6 +39,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetricManager = void 0;
 var findLicense_1 = require("./findLicense");
+var dotenv = require("dotenv");
+dotenv.config();
 var GITHUB_API = 'https://api.github.com/graphql';
 var MetricManager = /** @class */ (function () {
     /**
