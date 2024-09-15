@@ -1,6 +1,12 @@
 // takes info from API and outputs metrics
 
-import {request, gql} from 'graphql-request';
+//import {request, gql} from 'graphql-request';
+import { busFactor } from "./BusFactor";
+import { maintainer } from "./Maintainer";
+import { rampUp } from "./rampUp";
+import { license } from "./license";
+import { correctness } from "./correctness";
+
 
 const GITHUB_API = 'https://api.github.com/graphql';
 
@@ -8,11 +14,13 @@ const TOKEN = 'YOUR_GITHUB';
 
 
 
-class MetricManager {
+export class MetricManager {
     private owner: string;
     private repoName: string;
 
     constructor(path: string) {
+
+        // extracts owner and repository name from the URL
         let pathParts = path.split('/').filter(Boolean);
         if (pathParts.length >= 2) {
             this.owner = pathParts[0];
@@ -20,5 +28,19 @@ class MetricManager {
         } else {
             throw new Error('Invalid GitHub repository URL');
         }
+    }
+
+    getMetrics() : string {
+
+        return 'hi';
+    }
+
+
+    getOwner() : string {
+        return this.owner;
+    }
+
+    getRepoName() : string {
+        return this.repoName;
     }
 }

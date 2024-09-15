@@ -10,7 +10,7 @@ Luke Ostrander Committed
 Aidan Dannhausen-Brun committed
 
 
-Dependencies
+Dependencies:
 Commander
 URL
 graphql

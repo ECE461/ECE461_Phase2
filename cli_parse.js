@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = require("commander");
 var url_1 = require("url");
+var MetricManager_1 = require("./MetricManager");
 var program = new commander_1.Command();
 // site hostnames
 /*
@@ -21,17 +22,8 @@ program
     try {
         // Parse the URL
         var parsedUrl = new url_1.URL(urlString);
-        console.log('Pathname:', parsedUrl.pathname);
-        // Extract owner and repository name
-        var pathParts = parsedUrl.pathname.split('/').filter(Boolean);
-        if (pathParts.length >= 2) {
-            var owner = pathParts[0], repoName = pathParts[1];
-            console.log('Owner:', owner);
-            console.log('Repo Name:', repoName);
-        }
-        else {
-            throw new Error('Invalid GitHub repository URL');
-        }
+        // Extract owner and repository name and get metrics
+        var Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
     }
     catch (error) {
         console.error('Invalid URL:', error.message);

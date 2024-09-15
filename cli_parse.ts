@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { URL } from 'url';
-
+import { MetricManager } from './MetricManager';
 const program = new Command();
 
 // site hostnames
@@ -23,17 +23,9 @@ program
         try {
             // Parse the URL
             const parsedUrl = new URL(urlString);
-            console.log('Pathname:', parsedUrl.pathname);
             
-            // Extract owner and repository name
-            let pathParts = parsedUrl.pathname.split('/').filter(Boolean);
-            if (pathParts.length >= 2) {
-                const [owner, repoName] = pathParts;
-                console.log('Owner:', owner);
-                console.log('Repo Name:', repoName);
-            } else {
-                throw new Error('Invalid GitHub repository URL');
-            }
+            // Extract owner and repository name and get metrics
+            let Metrics = new MetricManager(parsedUrl.pathname);
 
         } catch (error) {
             console.error('Invalid URL:', error.message);
