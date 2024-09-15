@@ -30,7 +30,7 @@ program
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
             const metrics = await Metrics.getMetrics();
-            console.log('Metrics:', metrics, 'for', Metrics.getOwner(), '/', Metrics.getRepoName());
+            console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
 
         } catch (error) {
             console.error('Invalid URL:', (error as Error).message);

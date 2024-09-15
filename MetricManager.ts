@@ -36,7 +36,7 @@ export class MetricManager {
         let busFactorMetric = new busFactor(this.owner, this.repoName);
         let busFactorValue = await busFactorMetric.calculateBusFactor();
         //console.log(busFactorValue);
-        return 'busFactor: ' + busFactorValue;
+        return 'Contributors: ' + busFactorValue;
     }
 
 

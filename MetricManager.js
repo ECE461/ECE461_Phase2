@@ -68,7 +68,7 @@ var MetricManager = /** @class */ (function () {
                     case 1:
                         busFactorValue = _a.sent();
                         //console.log(busFactorValue);
-                        return [2 /*return*/, 'busFactor: ' + busFactorValue];
+                        return [2 /*return*/, 'Contributors: ' + busFactorValue];
                 }
             });
         });

@@ -67,7 +67,7 @@ program
                 return [4 /*yield*/, Metrics.getMetrics()];
             case 1:
                 metrics = _a.sent();
-                console.log('Metrics:', metrics, 'for', Metrics.getOwner(), '/', Metrics.getRepoName());
+                console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
                 return [3 /*break*/, 3];
             case 2:
                 error_1 = _a.sent();
