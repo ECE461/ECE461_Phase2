@@ -2,3 +2,9 @@ node_modules
 package-lock.json
 typescript testing
 Sample File for testing
+
+.env
+
+
+
+

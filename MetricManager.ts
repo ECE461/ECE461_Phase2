@@ -1,17 +1,18 @@
 // takes info from API and outputs metrics
 
-//import {request, gql} from 'graphql-request';
+import {request, gql} from 'graphql-request';
 import { busFactor } from "./BusFactor";
 import { maintainer } from "./Maintainer";
 import { rampUp } from "./rampUp";
 import { license } from "./license";
 import { correctness } from "./correctness";
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const GITHUB_API = 'https://api.github.com/graphql';
 
-const TOKEN = 'YOUR_GITHUB';
-
+//const TOKEN = 'YOUR_GITHUB';
+const TOKEN = process.env.GITHUB_TOKEN;
 
 
 export class MetricManager {
@@ -44,3 +45,4 @@ export class MetricManager {
         return this.repoName;
     }
 }
+
