@@ -50,7 +50,11 @@ var rampUp = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 5, , 6]);
-                        return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName))];
+                        return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName), {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 1:
                         response = _b.sent();
                         _a = response.data, size = _a.size, stargazers_count = _a.stargazers_count, forks_count = _a.forks_count;
@@ -71,14 +75,14 @@ var rampUp = /** @class */ (function () {
                             stargazers_count: stargazers_count,
                             forks_count: forks_count
                         });
-                        return [2 /*return*/, {
-                                fileCount: fileCount,
-                                lineCount: lineCount,
-                                dependenciesCount: dependenciesCount,
-                                size: size,
-                                stargazers_count: stargazers_count,
-                                forks_count: forks_count
-                            }];
+                        return [2 /*return*/, [
+                                "File Count: ".concat(fileCount),
+                                " Line Count: ".concat(lineCount),
+                                " Dependencies Count: ".concat(dependenciesCount),
+                                " Size: ".concat(size),
+                                " Stargazers Count: ".concat(stargazers_count),
+                                " Forks Count: ".concat(forks_count)
+                            ]];
                     case 5:
                         error_1 = _b.sent();
                         console.error('Error fetching repository stats:', error_1);

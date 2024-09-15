@@ -11,7 +11,11 @@ export class rampUp {
 
     async getRepoStats() {
         try {
-            const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}`);
+            const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}`, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`
+                }
+            });
             const { size, stargazers_count, forks_count } = response.data;
 
             const fileCount = await this.getFileCount();
@@ -25,14 +29,14 @@ export class rampUp {
                 stargazers_count,
                 forks_count
             });
-            return {
-                fileCount,
-                lineCount,
-                dependenciesCount,
-                size,
-                stargazers_count,
-                forks_count
-            };
+            return [
+                `File Count: ${fileCount}`,
+                ` Line Count: ${lineCount}`,
+                ` Dependencies Count: ${dependenciesCount}`,
+                ` Size: ${size}`,
+                ` Stargazers Count: ${stargazers_count}`,
+                ` Forks Count: ${forks_count}`
+            ];
         } catch (error) {
             console.error('Error fetching repository stats:', error);
         }

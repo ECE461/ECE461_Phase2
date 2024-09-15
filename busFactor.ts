@@ -15,7 +15,13 @@ export class busFactor {
 
         const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/commits?since=${twoYearsAgo.toISOString()}&sha=main`;
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                }
+            );
             const contributors = new Set<string>();
 
             response.data.forEach((commit: any) => {
