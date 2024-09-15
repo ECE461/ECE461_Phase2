@@ -1,6 +1,6 @@
 // takes info from API and outputs metrics
 
-import {request, gql} from 'graphql-request';
+//import {request, gql} from 'graphql-request';
 import { busFactor } from "./BusFactor";
 import { maintainer } from "./Maintainer";
 import { rampUp } from "./rampUp";
