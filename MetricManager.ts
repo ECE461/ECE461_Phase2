@@ -1,8 +1,8 @@
 // takes info from API and outputs metrics
 
-import {request, gql} from 'graphql-request';
-import { busFactor } from "./BusFactor";
-import { maintainer } from "./Maintainer";
+//import {request, gql} from 'graphql-request';
+import { busFactor } from "./busFactor";
+import { maintainer } from "./maintainer";
 import { rampUp } from "./rampUp";
 import { license } from "./license";
 import { correctness } from "./correctness";
@@ -31,9 +31,12 @@ export class MetricManager {
         }
     }
 
-    getMetrics() : string {
-
-        return 'hi';
+    async getMetrics() : Promise<string> {
+        // get the bus factor
+        let busFactorMetric = new busFactor(this.owner, this.repoName);
+        let busFactorValue = await busFactorMetric.calculateBusFactor();
+        //console.log(busFactorValue);
+        return 'busFactor: ' + busFactorValue;
     }
 
 

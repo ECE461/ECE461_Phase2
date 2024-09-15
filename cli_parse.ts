@@ -1,6 +1,9 @@
 import { Command } from 'commander';
 import { URL } from 'url';
 import { MetricManager } from './MetricManager';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const program = new Command();
 
 // site hostnames
@@ -19,16 +22,18 @@ program
   //.command('url <url>')             // command to run i.e.  "node cli_parse.ts url <url>"
   .arguments('<url>')
   .description('CLI program takes in URL of a package and outputs measured metrics')
-  .action((urlString: string) => {  
+  .action(async (urlString: string) => {  
         try {
             // Parse the URL
             const parsedUrl = new URL(urlString);
             
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
+            const metrics = await Metrics.getMetrics();
+            console.log('Metrics:', metrics, 'for', Metrics.getOwner(), '/', Metrics.getRepoName());
 
         } catch (error) {
-            console.error('Invalid URL:', error.message);
+            console.error('Invalid URL:', (error as Error).message);
             process.exit(1);
         }
     });

@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "ES6",                        // Specify ECMAScript target version
+      "module": "Node16",                      // Specify module code generation
+      "moduleResolution": "node16",           // Use Node.js module resolution strategy
+      "strict": true,                         // Enable all strict type-checking options
+      "esModuleInterop": true,                // Enable compatibility with CommonJS modules
+      "skipLibCheck": true,                   // Skip type checking of declaration files
+      "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
+      "outDir": "./dist",                     // Redirect output structure to the directory
+      "rootDir": "."                          // Specify the root directory of input files
+    },
+    "include": ["./src/**/*.ts", "./**/*.ts"], // Include all TypeScript files in the src directory and root
+    "exclude": ["node_modules", "dist"]       // Exclude node_modules and dist directories
+}
