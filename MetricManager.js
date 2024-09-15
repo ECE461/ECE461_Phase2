@@ -40,6 +40,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetricManager = void 0;
 //import {request, gql} from 'graphql-request';
 var busFactor_1 = require("./busFactor");
+var rampUp_1 = require("./rampUp");
 var dotenv = require("dotenv");
 dotenv.config();
 var GITHUB_API = 'https://api.github.com/graphql';
@@ -59,7 +60,7 @@ var MetricManager = /** @class */ (function () {
     }
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var busFactorMetric, busFactorValue;
+            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -67,8 +68,13 @@ var MetricManager = /** @class */ (function () {
                         return [4 /*yield*/, busFactorMetric.calculateBusFactor()];
                     case 1:
                         busFactorValue = _a.sent();
+                        rampUpMetric = new rampUp_1.rampUp(this.owner, this.repoName);
+                        return [4 /*yield*/, rampUpMetric.getRepoStats()];
+                    case 2:
+                        rampUpValue = _a.sent();
                         //console.log(busFactorValue);
-                        return [2 /*return*/, 'Contributors: ' + busFactorValue];
+                        return [2 /*return*/, 'Contributors: ' + busFactorValue +
+                                '\n\n ' + 'Repo Stats: ' + rampUpValue];
                 }
             });
         });

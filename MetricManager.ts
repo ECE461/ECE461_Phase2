@@ -35,8 +35,11 @@ export class MetricManager {
         // get the bus factor
         let busFactorMetric = new busFactor(this.owner, this.repoName);
         let busFactorValue = await busFactorMetric.calculateBusFactor();
+        let rampUpMetric = new rampUp(this.owner, this.repoName);
+        let rampUpValue = await rampUpMetric.getRepoStats();
         //console.log(busFactorValue);
-        return 'Contributors: ' + busFactorValue;
+        return 'Contributors: ' + busFactorValue + 
+        '\n\n ' + 'Repo Stats: ' + rampUpValue;
     }
 
 
