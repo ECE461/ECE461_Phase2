@@ -45,21 +45,30 @@ var busFactor = /** @class */ (function () {
     }
     busFactor.prototype.calculateBusFactor = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var twoYearsAgo, url, response, contributors;
+            var twoYearsAgo, url, response, contributors_1, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         twoYearsAgo = new Date();
                         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-                        url = "https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/commits?since=").concat(twoYearsAgo.toISOString());
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        url = "https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/commits?since=").concat(twoYearsAgo.toISOString(), "&sha=main");
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
                         response = _a.sent();
-                        contributors = new Set();
+                        contributors_1 = new Set();
                         response.data.forEach(function (commit) {
-                            contributors.add(commit.commit.author.name);
+                            contributors_1.add(commit.commit.author.name);
                         });
-                        return [2 /*return*/, contributors.size];
+                        return [2 /*return*/, Array.from(contributors_1)];
+                    case 3:
+                        error_1 = _a.sent();
+                        console.error('Error fetching commits:', error_1);
+                        process.exit(1);
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
