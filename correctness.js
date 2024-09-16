@@ -1,6 +1,4 @@
 "use strict";
-// export class correctness {
-//     private projectRoot: string;
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,157 +36,147 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Correctness = void 0;
-//     constructor(projectRoot: string) {
-//         this.projectRoot = projectRoot;
-//     }
-//     checkReadme(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, 'README.md'));
-//     }
-//     checkLicense(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, 'LICENSE'));
-//     }
-//     checkStability(): boolean {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return !!packageJson.version;
-//         }
-//         return false;
-//     }
-//     checkTests(): boolean {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return !!packageJson.scripts && !!packageJson.scripts.test;
-//         }
-//         return false;
-//     }
-//     checkLinters(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, '.eslintrc')) || fs.existsSync(path.join(this.projectRoot, 'tslint.json'));
-//     }
-//     checkDependencies(): string[] {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return Object.keys(packageJson.dependencies || {});
-//         }
-//         return [];
-//     }
-//     runChecks(): void {
-//         console.log('README exists:', this.checkReadme());
-//         console.log('LICENSE exists:', this.checkLicense());
-//         console.log('Stability (version exists):', this.checkStability());
-//         console.log('Tests defined:', this.checkTests());
-//         console.log('Linters defined:', this.checkLinters());
-//         console.log('Dependencies:', this.checkDependencies());
-//     }
-// }
-// const correctnessChecker = new correctness('path/to/project');
-// correctnessChecker.runChecks();
+exports.correctness = void 0;
 var axios_1 = require("axios");
-var Correctness = /** @class */ (function () {
-    function Correctness(projectRoot) {
+var correctness = /** @class */ (function () {
+    function correctness(projectRoot, owner, repoName) {
         this.projectRoot = projectRoot;
+        this.owner = owner;
+        this.repoName = repoName;
     }
-    Correctness.prototype.checkReadme = function () {
+    // successfully checks if README exists
+    correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_1;
+            var url, response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/README.md"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
                         response = _a.sent();
                         return [2 /*return*/, response.status === 200];
-                    case 2:
+                    case 3:
                         error_1 = _a.sent();
                         return [2 /*return*/, false];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    Correctness.prototype.checkLicense = function () {
+    // checks if any LICENSE exists in the repo
+    correctness.prototype.checkLicense = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_2;
+            var url, response, licenseContent, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/LICENSE"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/LICENSE");
+                        _a.label = 1;
                     case 1:
-                        response = _a.sent();
-                        return [2 /*return*/, response.status === 200];
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
                     case 2:
+                        response = _a.sent();
+                        if (response.status === 200) {
+                            licenseContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
+                            return [2 /*return*/, licenseContent.includes('MIT License')];
+                        }
+                        return [2 /*return*/, false];
+                    case 3:
                         error_2 = _a.sent();
                         return [2 /*return*/, false];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    Correctness.prototype.checkStability = function () {
+    // checks if there are multiple releases or versions of the repo
+    correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, packageJson, error_3;
+            var url, response, releases, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/package.json"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/releases");
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
                         response = _a.sent();
                         if (response.status === 200) {
-                            packageJson = response.data;
-                            return [2 /*return*/, !!packageJson.version];
+                            releases = response.data;
+                            return [2 /*return*/, releases.length > 1];
                         }
                         return [2 /*return*/, false];
-                    case 2:
+                    case 3:
                         error_3 = _a.sent();
                         return [2 /*return*/, false];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    Correctness.prototype.checkTests = function () {
+    // checks to see if there are any test files in the repo
+    correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, packageJson, error_4;
+            var url, response, files, testPatterns_1, error_4;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/package.json"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents");
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
                         response = _a.sent();
                         if (response.status === 200) {
-                            packageJson = response.data;
-                            return [2 /*return*/, !!packageJson.scripts && !!packageJson.scripts.test];
+                            files = response.data;
+                            testPatterns_1 = [/test/i, /spec/i, /^__tests__$/i];
+                            return [2 /*return*/, files.some(function (file) { return testPatterns_1.some(function (pattern) { return pattern.test(file.name); }); })];
                         }
                         return [2 /*return*/, false];
-                    case 2:
+                    case 3:
                         error_4 = _a.sent();
                         return [2 /*return*/, false];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    Correctness.prototype.checkLinters = function () {
+    // checks to see if there are any linters defined in the repo
+    correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var eslintResponse, tslintResponse, error_5;
+            var url, response, files, linterFiles_1, error_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/.eslintrc"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents");
+                        _a.label = 1;
                     case 1:
-                        eslintResponse = _a.sent();
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/tslint.json"))];
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
                     case 2:
-                        tslintResponse = _a.sent();
-                        return [2 /*return*/, eslintResponse.status === 200 || tslintResponse.status === 200];
+                        response = _a.sent();
+                        if (response.status === 200) {
+                            files = response.data;
+                            linterFiles_1 = [
+                                '.eslintrc',
+                                '.eslintrc.json',
+                                '.eslintrc.js',
+                                'tslint.json',
+                                '.stylelintrc',
+                                '.stylelintrc.json',
+                                '.stylelintrc.js'
+                            ];
+                            return [2 /*return*/, files.some(function (file) { return linterFiles_1.includes(file.name); })];
+                        }
+                        return [2 /*return*/, false];
                     case 3:
                         error_5 = _a.sent();
                         return [2 /*return*/, false];
@@ -197,30 +185,34 @@ var Correctness = /** @class */ (function () {
             });
         });
     };
-    Correctness.prototype.checkDependencies = function () {
+    correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, packageJson, error_6;
+            var url, response, packageJsonContent, packageJson, error_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(this.projectRoot, "/package.json"))];
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/package.json");
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
                         response = _a.sent();
                         if (response.status === 200) {
-                            packageJson = response.data;
+                            packageJsonContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
+                            packageJson = JSON.parse(packageJsonContent);
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {})];
                         }
                         return [2 /*return*/, []];
-                    case 2:
+                    case 3:
                         error_6 = _a.sent();
                         return [2 /*return*/, []];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
-    Correctness.prototype.runChecks = function () {
+    correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
             return __generator(this, function (_u) {
@@ -261,10 +253,15 @@ var Correctness = /** @class */ (function () {
             });
         });
     };
-    return Correctness;
+    return correctness;
 }());
-exports.Correctness = Correctness;
-// Example usage:
-var projectPath = 'https://api.github.com/graphql';
-var correctnessChecker = new Correctness(projectPath);
+exports.correctness = correctness;
+// Testing:
+// const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
+// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
+var projectPath = 'https://github.com/fishaudio/fish-speech';
+// const projectPath = 'https://github.com/Allar/ue5-style-guide';
+//const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
+// const correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
+var correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
 correctnessChecker.runChecks();

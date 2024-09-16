@@ -1,96 +1,52 @@
-// export class correctness {
-//     private projectRoot: string;
-
-//     constructor(projectRoot: string) {
-//         this.projectRoot = projectRoot;
-//     }
-
-//     checkReadme(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, 'README.md'));
-//     }
-
-//     checkLicense(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, 'LICENSE'));
-//     }
-
-//     checkStability(): boolean {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return !!packageJson.version;
-//         }
-//         return false;
-//     }
-
-//     checkTests(): boolean {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return !!packageJson.scripts && !!packageJson.scripts.test;
-//         }
-//         return false;
-//     }
-
-//     checkLinters(): boolean {
-//         return fs.existsSync(path.join(this.projectRoot, '.eslintrc')) || fs.existsSync(path.join(this.projectRoot, 'tslint.json'));
-//     }
-
-//     checkDependencies(): string[] {
-//         const packageJsonPath = path.join(this.projectRoot, 'package.json');
-//         if (fs.existsSync(packageJsonPath)) {
-//             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//             return Object.keys(packageJson.dependencies || {});
-//         }
-//         return [];
-//     }
-
-//     runChecks(): void {
-//         console.log('README exists:', this.checkReadme());
-//         console.log('LICENSE exists:', this.checkLicense());
-//         console.log('Stability (version exists):', this.checkStability());
-//         console.log('Tests defined:', this.checkTests());
-//         console.log('Linters defined:', this.checkLinters());
-//         console.log('Dependencies:', this.checkDependencies());
-//     }
-// }
-
-// const correctnessChecker = new correctness('path/to/project');
-// correctnessChecker.runChecks();
-
-
 import axios from 'axios';
 
-export class Correctness {
+export class correctness {
+  private owner: string;
+  private repoName: string;
   private projectRoot: string;
 
-  constructor(projectRoot: string) {
+  constructor(projectRoot: string, owner: string, repoName: string) {
     this.projectRoot = projectRoot;
+    this.owner = owner;
+    this.repoName = repoName;
   }
 
+  // successfully checks if README exists
   async checkReadme(): Promise<boolean> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
     try {
-      const response = await axios.get(`${this.projectRoot}/README.md`);
+      //const response = await axios.get(`${this.projectRoot}/README.md`);
+      const response = await axios.get(url);
       return response.status === 200;
     } catch (error) {
       return false;
     }
   }
 
+  // checks if any LICENSE exists in the repo
   async checkLicense(): Promise<boolean> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents/LICENSE`;
     try {
-      const response = await axios.get(`${this.projectRoot}/LICENSE`);
-      return response.status === 200;
+      const response = await axios.get(url);
+      if (response.status === 200) {
+        const licenseContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        return licenseContent.includes('MIT License');
+      }
+      return false;
     } catch (error) {
       return false;
     }
   }
 
+  // checks if there are multiple releases or versions of the repo
   async checkStability(): Promise<boolean> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/releases`;
     try {
-      const response = await axios.get(`${this.projectRoot}/package.json`);
+      // const response = await axios.get(`${this.projectRoot}/package.json`);
+      const response = await axios.get(url);
       if (response.status === 200) {
-        const packageJson = response.data;
-        return !!packageJson.version;
+        const releases = response.data;
+        return releases.length > 1;
       }
       return false;
     } catch (error) {
@@ -98,12 +54,15 @@ export class Correctness {
     }
   }
 
+  // checks to see if there are any test files in the repo
   async checkTests(): Promise<boolean> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents`;
     try {
-      const response = await axios.get(`${this.projectRoot}/package.json`);
+      const response = await axios.get(url);
       if (response.status === 200) {
-        const packageJson = response.data;
-        return !!packageJson.scripts && !!packageJson.scripts.test;
+        const files = response.data;
+        const testPatterns = [/test/i, /spec/i, /^__tests__$/i];
+        return files.some((file: any) => testPatterns.some(pattern => pattern.test(file.name)));
       }
       return false;
     } catch (error) {
@@ -111,21 +70,37 @@ export class Correctness {
     }
   }
 
+  // checks to see if there are any linters defined in the repo
   async checkLinters(): Promise<boolean> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents`;
     try {
-      const eslintResponse = await axios.get(`${this.projectRoot}/.eslintrc`);
-      const tslintResponse = await axios.get(`${this.projectRoot}/tslint.json`);
-      return eslintResponse.status === 200 || tslintResponse.status === 200;
+      const response = await axios.get(url);
+      if (response.status === 200) {
+        const files = response.data;
+        const linterFiles = [
+          '.eslintrc',
+          '.eslintrc.json',
+          '.eslintrc.js',
+          'tslint.json',
+          '.stylelintrc',
+          '.stylelintrc.json',
+          '.stylelintrc.js'
+        ];
+        return files.some((file: any) => linterFiles.includes(file.name));
+      }
+      return false;
     } catch (error) {
       return false;
     }
   }
 
   async checkDependencies(): Promise<string[]> {
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents/package.json`;
     try {
-      const response = await axios.get(`${this.projectRoot}/package.json`);
+      const response = await axios.get(url);
       if (response.status === 200) {
-        const packageJson = response.data;
+        const packageJsonContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
+        const packageJson = JSON.parse(packageJsonContent);
         return Object.keys(packageJson.dependencies || {});
       }
       return [];
@@ -144,7 +119,15 @@ export class Correctness {
   }
 }
 
-// Example usage:
-const projectPath = 'https://api.github.com/graphql';
-const correctnessChecker = new Correctness(projectPath);
-correctnessChecker.runChecks();
+// Testing:
+
+// const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
+// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
+// const projectPath = 'https://github.com/fishaudio/fish-speech';
+// const projectPath = 'https://github.com/Allar/ue5-style-guide';
+
+//const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
+// const correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
+// const correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
+// correctnessChecker.runChecks();
+
