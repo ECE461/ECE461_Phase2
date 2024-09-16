@@ -1,4 +1,8 @@
 import axios from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+const GITHUB_API = 'https://raw.githubusercontent.com';
 
 export class correctness {
   private owner: string;
@@ -11,9 +15,12 @@ export class correctness {
     this.repoName = repoName;
   }
 
-  // successfully checks if README exists
+  /**  
+   * successfully checks if README exists
+   * @returns boolean
+   * */ 
   async checkReadme(): Promise<boolean> {
-    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
+    const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents/Readme.md`;
     try {
       //const response = await axios.get(`${this.projectRoot}/README.md`);
       const response = await axios.get(url);
@@ -23,7 +30,10 @@ export class correctness {
     }
   }
 
-  // checks if any LICENSE exists in the repo
+  /**  
+   * checks if any LICENSE exists in the repo
+   * @returns boolean
+   * */ 
   async checkLicense(): Promise<boolean> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents/LICENSE`;
     try {
@@ -38,7 +48,10 @@ export class correctness {
     }
   }
 
-  // checks if there are multiple releases or versions of the repo
+  /** 
+   * checks if there are multiple releases or versions of the repo
+   * @returns boolean
+   * */ 
   async checkStability(): Promise<boolean> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/releases`;
     try {
@@ -54,7 +67,10 @@ export class correctness {
     }
   }
 
-  // checks to see if there are any test files in the repo
+  /**
+   * checks to see if there are any test files in the repo
+   * @returns boolean
+   * */ 
   async checkTests(): Promise<boolean> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents`;
     try {
@@ -70,7 +86,10 @@ export class correctness {
     }
   }
 
-  // checks to see if there are any linters defined in the repo
+   /** 
+    * checks to see if there are any linters defined in the repo
+    * * @returns boolean
+   * */ 
   async checkLinters(): Promise<boolean> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents`;
     try {
@@ -93,7 +112,11 @@ export class correctness {
       return false;
     }
   }
-
+  
+  /** 
+    * checks to see if there are any dependencies defined in the repo
+    * * @returns boolean
+   * */ 
   async checkDependencies(): Promise<string[]> {
     const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/contents/package.json`;
     try {
@@ -122,12 +145,12 @@ export class correctness {
 // Testing:
 
 // const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
-// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
+const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
 // const projectPath = 'https://github.com/fishaudio/fish-speech';
 // const projectPath = 'https://github.com/Allar/ue5-style-guide';
 
 //const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
-// const correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
+const correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
 // const correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
-// correctnessChecker.runChecks();
+correctnessChecker.runChecks();
 

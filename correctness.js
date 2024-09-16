@@ -38,20 +38,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.correctness = void 0;
 var axios_1 = require("axios");
+var dotenv = require("dotenv");
+dotenv.config();
+var GITHUB_API = 'https://raw.githubusercontent.com';
 var correctness = /** @class */ (function () {
     function correctness(projectRoot, owner, repoName) {
         this.projectRoot = projectRoot;
         this.owner = owner;
         this.repoName = repoName;
     }
-    // successfully checks if README exists
+    /**
+     * successfully checks if README exists
+     * @returns boolean
+     * */
     correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/Readme.md");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
@@ -67,7 +73,10 @@ var correctness = /** @class */ (function () {
             });
         });
     };
-    // checks if any LICENSE exists in the repo
+    /**
+     * checks if any LICENSE exists in the repo
+     * @returns boolean
+     * */
     correctness.prototype.checkLicense = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, licenseContent, error_2;
@@ -94,7 +103,10 @@ var correctness = /** @class */ (function () {
             });
         });
     };
-    // checks if there are multiple releases or versions of the repo
+    /**
+     * checks if there are multiple releases or versions of the repo
+     * @returns boolean
+     * */
     correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, releases, error_3;
@@ -121,7 +133,10 @@ var correctness = /** @class */ (function () {
             });
         });
     };
-    // checks to see if there are any test files in the repo
+    /**
+     * checks to see if there are any test files in the repo
+     * @returns boolean
+     * */
     correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, files, testPatterns_1, error_4;
@@ -149,7 +164,10 @@ var correctness = /** @class */ (function () {
             });
         });
     };
-    // checks to see if there are any linters defined in the repo
+    /**
+     * checks to see if there are any linters defined in the repo
+     * * @returns boolean
+    * */
     correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, files, linterFiles_1, error_5;
@@ -185,6 +203,10 @@ var correctness = /** @class */ (function () {
             });
         });
     };
+    /**
+      * checks to see if there are any dependencies defined in the repo
+      * * @returns boolean
+     * */
     correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, packageJsonContent, packageJson, error_6;
@@ -258,10 +280,10 @@ var correctness = /** @class */ (function () {
 exports.correctness = correctness;
 // Testing:
 // const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
-// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
-var projectPath = 'https://github.com/fishaudio/fish-speech';
+var projectPath = 'https://github.com/AidanMDB/ECE-461-Team';
+// const projectPath = 'https://github.com/fishaudio/fish-speech';
 // const projectPath = 'https://github.com/Allar/ue5-style-guide';
 //const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
-// const correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
-var correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
+var correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
+// const correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
 correctnessChecker.runChecks();
