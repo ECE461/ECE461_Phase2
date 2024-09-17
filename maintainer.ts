@@ -31,7 +31,12 @@ export class maintainer {
         const daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
         // console.log('Days Diff: ', daysDiff);
 
+        // find open to total issue ratio
+        const openIssueRatio = await this.getOpenIssueRatioCount();
+        console.log("Open Issue Ratio: ", openIssueRatio);
+
         // calculate score (0-1) based on how long ago last commit was
+        // UDPATE SCORES WITH RATIO
         let score = 0;
         if(daysDiff >= 365) {
             score = 0;
@@ -53,6 +58,33 @@ export class maintainer {
         }
 
         return score;
+    }
+
+    /**
+     * Fetches the open issue count of the repository
+     * 
+     * @returns the open issue count
+     */
+    private async getOpenIssueRatioCount(): Promise<number> {
+        const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
+        try {
+            const response = await axios.get(url);
+            const openIssues = response.data.open_issues_count;
+            const closedIssues = response.data.closed_issues_count;
+            console.log('Open Issue Count: ', openIssues);
+            console.log('Closed Issue Count: ', closedIssues);
+            if (closedIssues + openIssues === 0) {
+                return 0;
+            }
+            else if (closedIssues === undefined) {
+                return openIssues;
+            }
+            const ratio = openIssues / (openIssues + closedIssues);
+            return ratio;
+        } catch (error) {
+            console.log('Error when fetching open issue ratio count: ', error);
+            throw new Error('Error when fetching open issue ratio count');
+        }
     }
 
     /**
@@ -81,5 +113,5 @@ export class maintainer {
 }
 
 // Testing
-const maintainerChecker = new maintainer('fishaudio', 'realtime-vc-gui');
+const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
 maintainerChecker.correctnessChecker();

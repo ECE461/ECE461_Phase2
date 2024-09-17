@@ -56,7 +56,7 @@ var maintainer = /** @class */ (function () {
      */
     maintainer.prototype.getMaintainerScore = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var lastCommitDateStr, lastCommitDate, todayDate, dateDiff, daysDiff, score;
+            var lastCommitDateStr, lastCommitDate, todayDate, dateDiff, daysDiff, openIssueRatio, score;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getLastCommit()];
@@ -66,6 +66,10 @@ var maintainer = /** @class */ (function () {
                         todayDate = new Date();
                         dateDiff = Math.abs(todayDate.getTime() - lastCommitDate.getTime());
                         daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
+                        return [4 /*yield*/, this.getOpenIssueRatioCount()];
+                    case 2:
+                        openIssueRatio = _a.sent();
+                        console.log("Open Issue Ratio: ", openIssueRatio);
                         score = 0;
                         if (daysDiff >= 365) {
                             score = 0;
@@ -91,13 +95,52 @@ var maintainer = /** @class */ (function () {
         });
     };
     /**
+     * Fetches the open issue count of the repository
+     *
+     * @returns the open issue count
+     */
+    maintainer.prototype.getOpenIssueRatioCount = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var url, response, openIssues, closedIssues, ratio, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(url)];
+                    case 2:
+                        response = _a.sent();
+                        openIssues = response.data.open_issues_count;
+                        closedIssues = response.data.closed_issues_count;
+                        console.log('Open Issue Count: ', openIssues);
+                        console.log('Closed Issue Count: ', closedIssues);
+                        if (closedIssues + openIssues === 0) {
+                            return [2 /*return*/, 0];
+                        }
+                        else if (closedIssues === undefined) {
+                            return [2 /*return*/, openIssues];
+                        }
+                        ratio = openIssues / (openIssues + closedIssues);
+                        return [2 /*return*/, ratio];
+                    case 3:
+                        error_1 = _a.sent();
+                        console.log('Error when fetching open issue ratio count: ', error_1);
+                        throw new Error('Error when fetching open issue ratio count');
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
      * Fetches the last commit date of the repository
      *
      * @returns the date of the last commit
      */
     maintainer.prototype.getLastCommit = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, lastCommit, error_1;
+            var url, response, lastCommit, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -112,8 +155,8 @@ var maintainer = /** @class */ (function () {
                         console.log('Last Commit Data: ', lastCommit.commit.author.date);
                         return [2 /*return*/, lastCommit.commit.author.date];
                     case 3:
-                        error_1 = _a.sent();
-                        console.log('Error when fetching last commit data: ', error_1);
+                        error_2 = _a.sent();
+                        console.log('Error when fetching last commit data: ', error_2);
                         throw new Error('Error when fetching last commit data');
                     case 4: return [2 /*return*/];
                 }
@@ -141,6 +184,5 @@ var maintainer = /** @class */ (function () {
 }());
 exports.maintainer = maintainer;
 // Testing
-var maintainerChecker = new maintainer('fishaudio', 'realtime-vc-gui');
+var maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
 maintainerChecker.correctnessChecker();
-// swethatripuramallu/Computer-Science-Mini-Project
