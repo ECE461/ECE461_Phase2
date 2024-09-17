@@ -101,19 +101,23 @@ var maintainer = /** @class */ (function () {
      */
     maintainer.prototype.getOpenIssueRatioCount = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, openIssues, closedIssues, ratio, error_1;
+            var url, closedUrl, response, openIssues, closedResponse, closedIssues, ratio, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
+                        closedUrl = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/issues?state=closed");
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
+                        _a.trys.push([1, 4, , 5]);
                         return [4 /*yield*/, axios_1.default.get(url)];
                     case 2:
                         response = _a.sent();
                         openIssues = response.data.open_issues_count;
-                        closedIssues = response.data.closed_issues_count;
+                        return [4 /*yield*/, axios_1.default.get(closedUrl)];
+                    case 3:
+                        closedResponse = _a.sent();
+                        closedIssues = closedResponse.data.length;
                         console.log('Open Issue Count: ', openIssues);
                         console.log('Closed Issue Count: ', closedIssues);
                         if (closedIssues + openIssues === 0) {
@@ -124,11 +128,11 @@ var maintainer = /** @class */ (function () {
                         }
                         ratio = openIssues / (openIssues + closedIssues);
                         return [2 /*return*/, ratio];
-                    case 3:
+                    case 4:
                         error_1 = _a.sent();
                         console.log('Error when fetching open issue ratio count: ', error_1);
                         throw new Error('Error when fetching open issue ratio count');
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });

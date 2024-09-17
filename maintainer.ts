@@ -35,26 +35,25 @@ export class maintainer {
         const openIssueRatio = await this.getOpenIssueRatioCount();
         console.log("Open Issue Ratio: ", openIssueRatio);
 
-        // calculate score (0-1) based on how long ago last commit was
-        // UDPATE SCORES WITH RATIO
+        // calculate score (0-1) based on how long ago last commit was & open to total issue ratio
         let score = 0;
-        if(daysDiff >= 365) {
-            score = 0;
+        if (daysDiff < 73 && openIssueRatio < 0.2) {
+            score = 1;
         }
-        else if(daysDiff >= 292) {
-            score = 0.2
+        else if (daysDiff < 146 && openIssueRatio < 0.4) {
+            score = 0.8;
         }
-        else if(daysDiff >= 219) {
-            score = 0.4
+        else if (daysDiff < 219 && openIssueRatio < 0.6) {
+            score = 0.6;
         }
-        else if(daysDiff >= 146) {
-            score = 0.6
+        else if (daysDiff < 292 && openIssueRatio < 0.8) {
+            score = 0.4;
         }
-        else if(daysDiff >= 73) {
-            score = 0.8
+        else if (daysDiff < 365 && openIssueRatio < 1) {
+            score = 0.2;
         }
         else {
-            score = 1;
+            score = 0;
         }
 
         return score;
@@ -67,12 +66,16 @@ export class maintainer {
      */
     private async getOpenIssueRatioCount(): Promise<number> {
         const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
+        const closedUrl = `https://api.github.com/repos/${this.owner}/${this.repoName}/issues?state=closed`;
         try {
             const response = await axios.get(url);
             const openIssues = response.data.open_issues_count;
-            const closedIssues = response.data.closed_issues_count;
-            console.log('Open Issue Count: ', openIssues);
-            console.log('Closed Issue Count: ', closedIssues);
+
+            const closedResponse = await axios.get(closedUrl);
+            const closedIssues = closedResponse.data.length;
+
+            // console.log('Open Issue Count: ', openIssues);
+            // console.log('Closed Issue Count: ', closedIssues);
             if (closedIssues + openIssues === 0) {
                 return 0;
             }
