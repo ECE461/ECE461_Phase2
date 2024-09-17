@@ -42,91 +42,88 @@ var dotenv = require("dotenv");
 dotenv.config();
 var GITHUB_API = 'https://raw.githubusercontent.com';
 var correctness = /** @class */ (function () {
-    function correctness(projectRoot, owner, repoName) {
-        this.projectRoot = projectRoot;
+    function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
+        this.githubToken = process.env.GITHUB_TOKEN || '';
+        this.repoContents = null;
     }
     /**
-     * successfully checks if README exists
-     * @returns boolean
-     * */
-    correctness.prototype.checkReadme = function () {
+     * Fetches the repository contents from the GitHub API
+     * stores them in the `repoContents` property
+     */
+    correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
             var url, response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/Readme.md");
+                        url = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        return [4 /*yield*/, axios_1.default.get(url, {
+                                headers: {
+                                    'Authorization': "token ".concat(this.githubToken)
+                                }
+                            })];
                     case 2:
                         response = _a.sent();
-                        return [2 /*return*/, response.status === 200];
+                        this.repoContents = response.data;
+                        return [3 /*break*/, 4];
                     case 3:
                         error_1 = _a.sent();
-                        return [2 /*return*/, false];
+                        console.error('Error fetching repository contents:', error_1);
+                        return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];
                 }
             });
         });
     };
     /**
-     * checks if any LICENSE exists in the repo
-     * @returns boolean
+     * successfully checks if README exists
+     * @returns {Promise<boolean>} - true if README exists, false otherwise
      * */
-    correctness.prototype.checkLicense = function () {
+    correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, licenseContent, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/LICENSE");
-                        _a.label = 1;
+                        if (!!this.repoContents) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
-                    case 2:
-                        response = _a.sent();
-                        if (response.status === 200) {
-                            licenseContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
-                            return [2 /*return*/, licenseContent.includes('MIT License')];
-                        }
-                        return [2 /*return*/, false];
-                    case 3:
-                        error_2 = _a.sent();
-                        return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
+                        _a.sent();
+                        _a.label = 2;
+                    case 2: return [2 /*return*/, this.repoContents.some(function (file) { return file.name.toLowerCase() === 'readme.md'; })];
                 }
             });
         });
     };
     /**
      * checks if there are multiple releases or versions of the repo
-     * @returns boolean
+     * @returns {Promise<boolean>} - true if there are multiple releases, false otherwise
      * */
     correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, releases, error_3;
+            var releasesUrl, response, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/releases");
+                        releasesUrl = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/releases");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        return [4 /*yield*/, axios_1.default.get(releasesUrl, {
+                                headers: {
+                                    'Authorization': "token ".concat(this.githubToken)
+                                }
+                            })];
                     case 2:
                         response = _a.sent();
-                        if (response.status === 200) {
-                            releases = response.data;
-                            return [2 /*return*/, releases.length > 1];
-                        }
-                        return [2 /*return*/, false];
+                        return [2 /*return*/, response.data.length > 1];
                     case 3:
-                        error_3 = _a.sent();
+                        error_2 = _a.sent();
+                        console.error('Error fetching releases:', error_2);
                         return [2 /*return*/, false];
                     case 4: return [2 /*return*/];
                 }
@@ -135,141 +132,124 @@ var correctness = /** @class */ (function () {
     };
     /**
      * checks to see if there are any test files in the repo
-     * @returns boolean
+     * @returns {Promise<boolean>} - true if there are test files, false otherwise
      * */
     correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, files, testPatterns_1, error_4;
+            var testPatterns;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents");
-                        _a.label = 1;
+                        if (!!this.repoContents) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        _a.sent();
+                        _a.label = 2;
                     case 2:
-                        response = _a.sent();
-                        if (response.status === 200) {
-                            files = response.data;
-                            testPatterns_1 = [/test/i, /spec/i, /^__tests__$/i];
-                            return [2 /*return*/, files.some(function (file) { return testPatterns_1.some(function (pattern) { return pattern.test(file.name); }); })];
-                        }
-                        return [2 /*return*/, false];
-                    case 3:
-                        error_4 = _a.sent();
-                        return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
+                        testPatterns = [/test/i, /spec/i, /^__tests__$/i];
+                        return [2 /*return*/, this.repoContents.some(function (file) { return testPatterns.some(function (pattern) { return pattern.test(file.name); }); })];
                 }
             });
         });
     };
     /**
      * checks to see if there are any linters defined in the repo
-     * * @returns boolean
+     * * @returns {Promise<boolean>} - true if there are linters, false otherwise
     * */
     correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, files, linterFiles_1, error_5;
+            var linterFiles;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents");
-                        _a.label = 1;
+                        if (!!this.repoContents) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        _a.sent();
+                        _a.label = 2;
                     case 2:
-                        response = _a.sent();
-                        if (response.status === 200) {
-                            files = response.data;
-                            linterFiles_1 = [
-                                '.eslintrc',
-                                '.eslintrc.json',
-                                '.eslintrc.js',
-                                'tslint.json',
-                                '.stylelintrc',
-                                '.stylelintrc.json',
-                                '.stylelintrc.js'
-                            ];
-                            return [2 /*return*/, files.some(function (file) { return linterFiles_1.includes(file.name); })];
-                        }
-                        return [2 /*return*/, false];
-                    case 3:
-                        error_5 = _a.sent();
-                        return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
+                        linterFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
+                        return [2 /*return*/, this.repoContents.some(function (file) { return linterFiles.includes(file.name.toLowerCase()); })];
                 }
             });
         });
     };
     /**
       * checks to see if there are any dependencies defined in the repo
-      * * @returns boolean
+      * * @returns {Promise<string[]>} - list of dependencies
      * */
     correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, packageJsonContent, packageJson, error_6;
+            var packageJsonFile, url, response, packageJsonContent, packageJson, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/contents/package.json");
-                        _a.label = 1;
+                        if (!!this.repoContents) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        _a.sent();
+                        _a.label = 2;
                     case 2:
+                        packageJsonFile = this.repoContents.find(function (file) { return file.name.toLowerCase() === 'package.json'; });
+                        if (!packageJsonFile) {
+                            return [2 /*return*/, false];
+                        }
+                        url = packageJsonFile.download_url;
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, axios_1.default.get(url, {
+                                headers: {
+                                    'Authorization': "token ".concat(this.githubToken)
+                                }
+                            })];
+                    case 4:
                         response = _a.sent();
                         if (response.status === 200) {
                             packageJsonContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
                             packageJson = JSON.parse(packageJsonContent);
-                            return [2 /*return*/, Object.keys(packageJson.dependencies || {})];
+                            return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
-                        return [2 /*return*/, []];
-                    case 3:
-                        error_6 = _a.sent();
-                        return [2 /*return*/, []];
-                    case 4: return [2 /*return*/];
+                        return [2 /*return*/, false];
+                    case 5:
+                        error_3 = _a.sent();
+                        return [2 /*return*/, false];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
     };
     correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-            return __generator(this, function (_u) {
-                switch (_u.label) {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+            return __generator(this, function (_r) {
+                switch (_r.label) {
                     case 0:
                         _b = (_a = console).log;
                         _c = ['README exists:'];
                         return [4 /*yield*/, this.checkReadme()];
                     case 1:
-                        _b.apply(_a, _c.concat([_u.sent()]));
+                        _b.apply(_a, _c.concat([_r.sent()]));
                         _e = (_d = console).log;
-                        _f = ['LICENSE exists:'];
-                        return [4 /*yield*/, this.checkLicense()];
-                    case 2:
-                        _e.apply(_d, _f.concat([_u.sent()]));
-                        _h = (_g = console).log;
-                        _j = ['Stability (version exists):'];
+                        _f = ['Stability (version exists):'];
                         return [4 /*yield*/, this.checkStability()];
-                    case 3:
-                        _h.apply(_g, _j.concat([_u.sent()]));
-                        _l = (_k = console).log;
-                        _m = ['Tests defined:'];
+                    case 2:
+                        _e.apply(_d, _f.concat([_r.sent()]));
+                        _h = (_g = console).log;
+                        _j = ['Tests defined:'];
                         return [4 /*yield*/, this.checkTests()];
-                    case 4:
-                        _l.apply(_k, _m.concat([_u.sent()]));
-                        _p = (_o = console).log;
-                        _q = ['Linters defined:'];
+                    case 3:
+                        _h.apply(_g, _j.concat([_r.sent()]));
+                        _l = (_k = console).log;
+                        _m = ['Linters defined:'];
                         return [4 /*yield*/, this.checkLinters()];
-                    case 5:
-                        _p.apply(_o, _q.concat([_u.sent()]));
-                        _s = (_r = console).log;
-                        _t = ['Dependencies:'];
+                    case 4:
+                        _l.apply(_k, _m.concat([_r.sent()]));
+                        _p = (_o = console).log;
+                        _q = ['Dependencies defined:'];
                         return [4 /*yield*/, this.checkDependencies()];
-                    case 6:
-                        _s.apply(_r, _t.concat([_u.sent()]));
+                    case 5:
+                        _p.apply(_o, _q.concat([_r.sent()]));
                         return [2 /*return*/];
                 }
             });
@@ -280,10 +260,10 @@ var correctness = /** @class */ (function () {
 exports.correctness = correctness;
 // Testing:
 // const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
-var projectPath = 'https://github.com/AidanMDB/ECE-461-Team';
+// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
 // const projectPath = 'https://github.com/fishaudio/fish-speech';
 // const projectPath = 'https://github.com/Allar/ue5-style-guide';
 //const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
-var correctnessChecker = new correctness(projectPath, 'AidanMDB', 'ECE-461-Team');
+var correctnessChecker = new correctness('fishaudio', 'fish-speech');
 // const correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
 correctnessChecker.runChecks();
