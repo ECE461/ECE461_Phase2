@@ -19,7 +19,7 @@ export class correctness {
 
   /**
    * Fetches the repository contents from the GitHub API
-   * stores them in the `repoContents` property
+   * stores them in the `repoContents` 
    */
 
   async fetchRepoContents(): Promise<void> {

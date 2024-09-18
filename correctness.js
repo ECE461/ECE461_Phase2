@@ -45,12 +45,12 @@ var correctness = /** @class */ (function () {
     function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
-        this.githubToken = process.env.GITHUB_TOKEN || '';
+        this.githubToken = process.env.GITHUB_TOKEN || ''; // replace with token
         this.repoContents = null;
     }
     /**
      * Fetches the repository contents from the GitHub API
-     * stores them in the `repoContents` property
+     * stores them in the `repoContents`
      */
     correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -219,6 +219,7 @@ var correctness = /** @class */ (function () {
             });
         });
     };
+    /* TESTING FUNCTIONS */
     correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
@@ -258,6 +259,7 @@ var correctness = /** @class */ (function () {
     return correctness;
 }());
 exports.correctness = correctness;
+var correctnessChecker = new correctness('mrdoob', 'three.js');
 // Testing:
 // const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
 // const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
