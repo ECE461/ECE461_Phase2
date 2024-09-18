@@ -71,23 +71,23 @@ var maintainer = /** @class */ (function () {
                         openIssueRatio = _a.sent();
                         console.log("Open Issue Ratio: ", openIssueRatio);
                         score = 0;
-                        if (daysDiff >= 365) {
-                            score = 0;
+                        if (daysDiff < 73 && openIssueRatio < 0.2) {
+                            score = 1;
                         }
-                        else if (daysDiff >= 292) {
-                            score = 0.2;
-                        }
-                        else if (daysDiff >= 219) {
-                            score = 0.4;
-                        }
-                        else if (daysDiff >= 146) {
-                            score = 0.6;
-                        }
-                        else if (daysDiff >= 73) {
+                        else if (daysDiff < 146 && openIssueRatio < 0.4) {
                             score = 0.8;
                         }
+                        else if (daysDiff < 219 && openIssueRatio < 0.6) {
+                            score = 0.6;
+                        }
+                        else if (daysDiff < 292 && openIssueRatio < 0.8) {
+                            score = 0.4;
+                        }
+                        else if (daysDiff < 365 && openIssueRatio < 1) {
+                            score = 0.2;
+                        }
                         else {
-                            score = 1;
+                            score = 0;
                         }
                         return [2 /*return*/, score];
                 }
@@ -106,7 +106,7 @@ var maintainer = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
-                        closedUrl = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/issues?state=closed");
+                        closedUrl = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/issues");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
@@ -117,7 +117,7 @@ var maintainer = /** @class */ (function () {
                         return [4 /*yield*/, axios_1.default.get(closedUrl)];
                     case 3:
                         closedResponse = _a.sent();
-                        closedIssues = closedResponse.data.length;
+                        closedIssues = closedResponse.data[0].number;
                         console.log('Open Issue Count: ', openIssues);
                         console.log('Closed Issue Count: ', closedIssues);
                         if (closedIssues + openIssues === 0) {
@@ -188,5 +188,7 @@ var maintainer = /** @class */ (function () {
 }());
 exports.maintainer = maintainer;
 // Testing
-var maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
+// const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
+// const maintainerChecker = new maintainer('msolinsky', 'testing_issues');
+var maintainerChecker = new maintainer('mrdoob', 'three.js');
 maintainerChecker.correctnessChecker();

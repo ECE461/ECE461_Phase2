@@ -66,13 +66,13 @@ export class maintainer {
      */
     private async getOpenIssueRatioCount(): Promise<number> {
         const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
-        const closedUrl = `https://api.github.com/repos/${this.owner}/${this.repoName}/issues?state=closed`;
+        const closedUrl = `https://api.github.com/repos/${this.owner}/${this.repoName}/issues`;
         try {
             const response = await axios.get(url);
-            const openIssues = response.data.open_issues_count;
-
+            const openIssues = response.data.open_issues_count; // this number includes open pull requests
+            
             const closedResponse = await axios.get(closedUrl);
-            const closedIssues = closedResponse.data.length;
+            const closedIssues = closedResponse.data[0].number; // this number also includes pull requests
 
             // console.log('Open Issue Count: ', openIssues);
             // console.log('Closed Issue Count: ', closedIssues);
@@ -116,5 +116,7 @@ export class maintainer {
 }
 
 // Testing
-const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
+// const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
+// const maintainerChecker = new maintainer('msolinsky', 'testing_issues');
+const maintainerChecker = new maintainer('mrdoob', 'three.js');
 maintainerChecker.correctnessChecker();
