@@ -1,4 +1,8 @@
 import axios from "axios";
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+const GITHUB_API = 'https://api.github.com'
 
 export class maintainer {
     private owner: string;
@@ -65,8 +69,8 @@ export class maintainer {
      * @returns the open issue count
      */
     private async getOpenIssueRatioCount(): Promise<number> {
-        const url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
-        const closedUrl = `https://api.github.com/repos/${this.owner}/${this.repoName}/issues`;
+        const url = `${GITHUB_API}/repos/${this.owner}/${this.repoName}`;
+        const closedUrl = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/issues`;
         try {
             const response = await axios.get(url);
             const openIssues = response.data.open_issues_count; // this number includes open pull requests
@@ -101,7 +105,7 @@ export class maintainer {
      * @returns the date of the last commit
      */
     private async getLastCommit(): Promise<string> {
-        const url = `https://api.github.com/repos/${this.owner}/${this.repoName}/commits`;
+        const url = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/commits`;
         try {
             const response = await axios.get(url);
             const lastCommit = response.data[0];
@@ -121,11 +125,9 @@ export class maintainer {
 }
 
 // Testing
-// const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
-// const maintainerChecker = new maintainer('msolinsky', 'testing_issues');
 
 // test repo 1 (N/A)
-const maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // score is 0.4 (0 open issues)
+// const maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // score is 0.4 (0 open issues)
 
 // test repo 2 (should have high score)
 // const maintainerChecker = new maintainer('mrdoob', 'three.js'); //score is 1 (ratio is 0.0175)
@@ -142,4 +144,5 @@ const maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // score 
 // test repo 6 (N/A)
 // const maintainerChecker = new maintainer('ryanve', 'unlicensed'); // score is 0 (0 open issues)
 
-maintainerChecker.correctnessChecker();
+// uncomment this to run test
+// maintainerChecker.correctnessChecker();

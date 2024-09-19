@@ -38,6 +38,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.maintainer = void 0;
 var axios_1 = require("axios");
+var dotenv = require("dotenv");
+dotenv.config();
+var GITHUB_API = 'https://api.github.com';
 var maintainer = /** @class */ (function () {
     /**
      * constructs a metrics manager for a GitHub repository
@@ -106,8 +109,8 @@ var maintainer = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
-                        closedUrl = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/issues");
+                        url = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName);
+                        closedUrl = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/issues");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
@@ -154,7 +157,7 @@ var maintainer = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/commits");
+                        url = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/commits");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
@@ -194,18 +197,17 @@ var maintainer = /** @class */ (function () {
 }());
 exports.maintainer = maintainer;
 // Testing
-// const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
-// const maintainerChecker = new maintainer('msolinsky', 'testing_issues');
 // test repo 1 (N/A)
-var maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // error :(
+// const maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // score is 0.4 (0 open issues)
 // test repo 2 (should have high score)
 // const maintainerChecker = new maintainer('mrdoob', 'three.js'); //score is 1 (ratio is 0.0175)
 // test repo 3 (should have medium score)
 // const maintainerChecker = new maintainer('socketio', 'socket.io'); // score is 0.8 (ratio is 0.0333)
 // test repo 4 (N/A)
-// const maintainerChecker = new maintainer('prathameshnetake', 'libvlc'); // score is 0 (ratio is 0)
+// const maintainerChecker = new maintainer('prathameshnetake', 'libvlc'); // score is 0 (0 open issues)
 // test repo 5 (should have high score)
 // const maintainerChecker = new maintainer('facebook', 'react'); // score is 0.8 (ratio is 0.0255)
 // test repo 6 (N/A)
-// const maintainerChecker = new maintainer('ryanve', 'unlicensed'); // score is 0 (ratio is 0)
-maintainerChecker.correctnessChecker();
+// const maintainerChecker = new maintainer('ryanve', 'unlicensed'); // score is 0 (0 open issues)
+// uncomment this to run test
+// maintainerChecker.correctnessChecker();
