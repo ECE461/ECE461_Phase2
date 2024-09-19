@@ -29,7 +29,7 @@ export class maintainer {
         // calculate difference in days between the last commit and today
         const dateDiff = Math.abs(todayDate.getTime() - lastCommitDate.getTime());
         const daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
-        // console.log('Days Diff: ', daysDiff);
+        console.log('Days Diff: ', daysDiff);
 
         // find open to total issue ratio
         const openIssueRatio = await this.getOpenIssueRatioCount();
@@ -37,19 +37,19 @@ export class maintainer {
 
         // calculate score (0-1) based on how long ago last commit was & open to total issue ratio
         let score = 0;
-        if (daysDiff < 73 && openIssueRatio < 0.2) {
+        if (daysDiff < 73 && openIssueRatio < 0.02) {
             score = 1;
         }
-        else if (daysDiff < 146 && openIssueRatio < 0.4) {
+        else if (daysDiff < 146 && openIssueRatio < 0.04) {
             score = 0.8;
         }
-        else if (daysDiff < 219 && openIssueRatio < 0.6) {
+        else if (daysDiff < 219 && openIssueRatio < 0.06) {
             score = 0.6;
         }
-        else if (daysDiff < 292 && openIssueRatio < 0.8) {
+        else if (daysDiff < 292 && openIssueRatio < 0.08) {
             score = 0.4;
         }
-        else if (daysDiff < 365 && openIssueRatio < 1) {
+        else if (daysDiff < 365 && openIssueRatio < 0.1) {
             score = 0.2;
         }
         else {
@@ -70,9 +70,14 @@ export class maintainer {
         try {
             const response = await axios.get(url);
             const openIssues = response.data.open_issues_count; // this number includes open pull requests
+            console.log('Open Issue Count: ', openIssues);
             
             const closedResponse = await axios.get(closedUrl);
-            const closedIssues = closedResponse.data[0].number; // this number also includes pull requests
+            var closedIssues = 0;
+            if(closedResponse.data[0] != undefined) {
+                closedIssues = closedResponse.data[0].number; // this number also includes pull requests
+                console.log('Closed Issue Count: ', closedIssues);
+            }
 
             // console.log('Open Issue Count: ', openIssues);
             // console.log('Closed Issue Count: ', closedIssues);
@@ -100,7 +105,7 @@ export class maintainer {
         try {
             const response = await axios.get(url);
             const lastCommit = response.data[0];
-            console.log('Last Commit Data: ', lastCommit.commit.author.date);
+            // console.log('Last Commit Data: ', lastCommit.commit.author.date);
             return lastCommit.commit.author.date;
         } catch (error) {
             console.log('Error when fetching last commit data: ', error);
@@ -118,5 +123,23 @@ export class maintainer {
 // Testing
 // const maintainerChecker = new maintainer('AidanMDB', 'ECE-461-Team');
 // const maintainerChecker = new maintainer('msolinsky', 'testing_issues');
-const maintainerChecker = new maintainer('mrdoob', 'three.js');
+
+// test repo 1 (N/A)
+const maintainerChecker = new maintainer('hasansultan92', 'watch.js'); // score is 0.4 (0 open issues)
+
+// test repo 2 (should have high score)
+// const maintainerChecker = new maintainer('mrdoob', 'three.js'); //score is 1 (ratio is 0.0175)
+
+// test repo 3 (should have medium score)
+// const maintainerChecker = new maintainer('socketio', 'socket.io'); // score is 0.8 (ratio is 0.0333)
+
+// test repo 4 (N/A)
+// const maintainerChecker = new maintainer('prathameshnetake', 'libvlc'); // score is 0 (0 open issues)
+
+// test repo 5 (should have high score)
+// const maintainerChecker = new maintainer('facebook', 'react'); // score is 0.8 (ratio is 0.0255)
+
+// test repo 6 (N/A)
+// const maintainerChecker = new maintainer('ryanve', 'unlicensed'); // score is 0 (0 open issues)
+
 maintainerChecker.correctnessChecker();
