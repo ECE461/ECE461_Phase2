@@ -45,7 +45,7 @@ var busFactor = /** @class */ (function () {
     }
     busFactor.prototype.calculateBusFactor = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var twoYearsAgo, url, response, contributors_1, error_1;
+            var twoYearsAgo, url, response, contributors_1, numberOfContributors, score, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -63,10 +63,13 @@ var busFactor = /** @class */ (function () {
                     case 2:
                         response = _a.sent();
                         contributors_1 = new Set();
+                        // Extract the author name from each commit
                         response.data.forEach(function (commit) {
                             contributors_1.add(commit.commit.author.name);
                         });
-                        return [2 /*return*/, Array.from(contributors_1)];
+                        numberOfContributors = contributors_1.size;
+                        score = this.calculateBusFactorScore(numberOfContributors);
+                        return [2 /*return*/, score];
                     case 3:
                         error_1 = _a.sent();
                         console.error('Error fetching commits:', error_1);
@@ -76,6 +79,26 @@ var busFactor = /** @class */ (function () {
                 }
             });
         });
+    };
+    busFactor.prototype.calculateBusFactorScore = function (contributors) {
+        // Calculate the bus factor score based on the number of contributors
+        var score = 0;
+        if (contributors >= 10) {
+            score = 1;
+        }
+        else if (contributors >= 5) {
+            score = 0.5;
+        }
+        else if (contributors >= 2) {
+            score = 0.3;
+        }
+        else if (contributors >= 1) {
+            score = 0.1;
+        }
+        else {
+            score = 0;
+        }
+        return score;
     };
     return busFactor;
 }());

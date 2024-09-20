@@ -3,6 +3,12 @@ import axios from 'axios';
 export class rampUp {
     private repoOwner: string;
     private repoName: string;
+    private static readonly MAX_FILE_COUNT = 1000;
+    private static readonly MAX_LINE_COUNT = 100000;
+    private static readonly MAX_DEPENDENCIES_COUNT = 100;
+    private static readonly MAX_SIZE = 100000; // in KB
+    private static readonly MAX_STARGAZERS_COUNT = 10000;
+    private static readonly MAX_FORKS_COUNT = 10000;
 
     constructor(repoOwner: string, repoName: string) {
         this.repoOwner = repoOwner;
@@ -21,6 +27,7 @@ export class rampUp {
             const fileCount = await this.getFileCount();
             const lineCount = await this.getLineCount();
             const dependenciesCount = await this.getDependenciesCount();
+
             console.log('Repository Stats:', {
                 fileCount,
                 lineCount,
@@ -29,6 +36,18 @@ export class rampUp {
                 stargazers_count,
                 forks_count
             });
+
+            const score = this.calculateScore({
+                fileCount,
+                lineCount,
+                dependenciesCount,
+                size,
+                stargazers_count,
+                forks_count
+            });
+
+            return parseFloat(score.toFixed(3));
+
             return [
                 `File Count: ${fileCount}`,
                 ` Line Count: ${lineCount}`,
@@ -77,4 +96,34 @@ export class rampUp {
             return undefined; // Return undefined in case of an error
         }
     }
+
+    private calculateScore(stats: {
+        fileCount: number;
+        lineCount: number;
+        dependenciesCount: number | undefined;
+        size: number;
+        stargazers_count: number;
+        forks_count: number;
+    }): number {
+        const {
+            fileCount,
+            lineCount,
+            dependenciesCount,
+            size,
+            stargazers_count,
+            forks_count
+        } = stats;
+
+        const fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
+        const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
+        const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        const sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
+        const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
+        const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
+
+        const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+
+        return totalScore;
+    }
+
 }

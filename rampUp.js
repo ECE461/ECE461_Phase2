@@ -45,7 +45,7 @@ var rampUp = /** @class */ (function () {
     }
     rampUp.prototype.getRepoStats = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, _a, size, stargazers_count, forks_count, fileCount, lineCount, dependenciesCount, error_1;
+            var response, _a, size, stargazers_count, forks_count, fileCount, lineCount, dependenciesCount, score, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -75,14 +75,15 @@ var rampUp = /** @class */ (function () {
                             stargazers_count: stargazers_count,
                             forks_count: forks_count
                         });
-                        return [2 /*return*/, [
-                                "File Count: ".concat(fileCount),
-                                " Line Count: ".concat(lineCount),
-                                " Dependencies Count: ".concat(dependenciesCount),
-                                " Size: ".concat(size),
-                                " Stargazers Count: ".concat(stargazers_count),
-                                " Forks Count: ".concat(forks_count)
-                            ]];
+                        score = this.calculateScore({
+                            fileCount: fileCount,
+                            lineCount: lineCount,
+                            dependenciesCount: dependenciesCount,
+                            size: size,
+                            stargazers_count: stargazers_count,
+                            forks_count: forks_count
+                        });
+                        return [2 /*return*/, parseFloat(score.toFixed(3))];
                     case 5:
                         error_1 = _b.sent();
                         console.error('Error fetching repository stats:', error_1);
@@ -156,6 +157,23 @@ var rampUp = /** @class */ (function () {
             });
         });
     };
+    rampUp.prototype.calculateScore = function (stats) {
+        var fileCount = stats.fileCount, lineCount = stats.lineCount, dependenciesCount = stats.dependenciesCount, size = stats.size, stargazers_count = stats.stargazers_count, forks_count = stats.forks_count;
+        var fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
+        var lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
+        var dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        var sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
+        var stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
+        var forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
+        var totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+        return totalScore;
+    };
+    rampUp.MAX_FILE_COUNT = 1000;
+    rampUp.MAX_LINE_COUNT = 100000;
+    rampUp.MAX_DEPENDENCIES_COUNT = 100;
+    rampUp.MAX_SIZE = 100000; // in KB
+    rampUp.MAX_STARGAZERS_COUNT = 10000;
+    rampUp.MAX_FORKS_COUNT = 10000;
     return rampUp;
 }());
 exports.rampUp = rampUp;

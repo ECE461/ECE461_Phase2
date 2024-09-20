@@ -42,6 +42,10 @@ var MetricManager_1 = require("./MetricManager");
 var dotenv = require("dotenv");
 dotenv.config();
 var program = new commander_1.Command();
+// Sanitize the URL to prevent command injection
+var sanitizeGitUrl = function (url) {
+    return url.replace(/[;`<>]/g, '');
+};
 // site hostnames
 /*
 let hostNPM:string  = 'npm.com';
@@ -57,12 +61,13 @@ program
     .arguments('<url>')
     .description('CLI program takes in URL of a package and outputs measured metrics')
     .action(function (urlString) { return __awaiter(void 0, void 0, void 0, function () {
-    var parsedUrl, Metrics, metrics, error_1;
+    var sanitized_urlString, parsedUrl, Metrics, metrics, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                parsedUrl = new url_1.URL(urlString);
+                sanitized_urlString = sanitizeGitUrl(urlString);
+                parsedUrl = new url_1.URL(sanitized_urlString);
                 Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
                 return [4 /*yield*/, Metrics.getMetrics()];
             case 1:

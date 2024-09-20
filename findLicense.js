@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.license = void 0;
 var axios_1 = require("axios");
 var GITHUB_API = 'https://raw.githubusercontent.com';
+var NPM_API = 'https://registry.npmjs.org';
 var license = /** @class */ (function () {
     /**
      * constructs a metrics manager for a GitHub repository
@@ -57,12 +58,13 @@ var license = /** @class */ (function () {
      */
     license.prototype.getFileContent = function (path) {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, error_1;
+            var url, license_list, response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         url = "".concat(GITHUB_API, "/").concat(this.owner, "/").concat(this.repoName, "/main/").concat(path);
+                        license_list = ['LGPLv2.1', 'MIT License', 'Apache License 2.0', 'BSD 3-Clause License'];
                         return [4 /*yield*/, axios_1.default.get(url, {
                                 headers: {
                                     'Authorization': "token ".concat(process.env.GITHUB_TOKEN)
@@ -70,7 +72,7 @@ var license = /** @class */ (function () {
                             })];
                     case 1:
                         response = _a.sent();
-                        return [2 /*return*/, response.data.includes('LGPLv2.1')];
+                        return [2 /*return*/, response.data.includes(license_list)];
                     case 2:
                         error_1 = _a.sent();
                         //console.error(`Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);

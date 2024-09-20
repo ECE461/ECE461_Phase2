@@ -43,7 +43,7 @@ export class MetricManager {
 
         let rampUpMetric = new rampUp(this.owner, this.repoName);
         let rampUpValue = await rampUpMetric.getRepoStats();
-        console.log(`The Repo Stats are: ${rampUpValue}`);
+        console.log(`The RampUp Score is: ${rampUpValue}`);
 
         let licenseMetric = new license(this.owner, this.repoName)
         let exists = await licenseMetric.getRepoLicense();
