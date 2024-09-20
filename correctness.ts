@@ -24,19 +24,50 @@ export class Correctness {
     this.packageData = null;
   }
 
+  public async getCorrectnessScore(): Promise<number> {
+    // parse url?
+    parseUrl('url here');
+
+    // then fetch one data through github or npm
+    this.fetchRepoContents();
+    this.fetchPackageData();
+
+    // run checks
+    const readme = await this.checkReadme();
+    var stability = 0;
+    if(await this.checkStability() == true) {
+      stability = 1;
+    }
+    var tests = 0;
+    if(await this.checkTests() == true) {
+      tests = 1;
+    }
+    var linters = 0;
+    if(await this.checkLinters() == true) {
+      linters = 1;
+    }
+    var dependencies = 0;
+    if(await this.checkDependencies() == true) {
+      dependencies = 1;
+    }
+
+    // calculate score
+    return (readme + stability + tests + linters + dependencies) / 5;
+  }
   /** 
    * Fetches the contents of the github repository.
    * */
   async fetchRepoContents() {
+    const git = require('isomorphic-git');
+    const http = require('isomorphic-git/http/node');
+    const fs = require('fs');
+    const dir = process.cwd() + 'test-clone';
+
     try {
-      const response = await axios.get(`${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents`, {
-        headers: {
-          Authorization: `token ${this.githubToken}`
-        }
-      });
-      this.repoContents = response.data;
+      git.clone({ fs, http, dir, url: '${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents', depth: 1 }).then(console.log('Repository cloned successfully!'))
     } catch (error) {
-      throw new Error(`Failed to fetch repository contents: ${error.response.statusText}`);
+      console.error('Error:', error);
+      throw new Error(`Failed to fetch repository contents`);
     }
   }
 
@@ -48,7 +79,8 @@ export class Correctness {
       const response = await axios.get(`${NPM_API}/${this.packageName}`);
       this.packageData = response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch package data: ${error.response.statusText}`);
+      console.log('Error:', error);
+      throw new Error(`Failed to fetch package data`);
     }
   }
 
@@ -56,7 +88,7 @@ export class Correctness {
    * Checks if the repository or package has a README file.
    * @returns {boolean} - true if README exists, false otherwise.
    * */
-  async checkReadme(): Promise<boolean> {
+  async checkReadme(): Promise<number> {
     if (this.owner && this.repoName) {
       if (!this.repoContents) {
         await this.fetchRepoContents();
@@ -65,13 +97,13 @@ export class Correctness {
     } else if (this.packageName) {
       await this.fetchPackageData();
       if (this.packageData && this.packageData.readme) {
-        return true;
+        return 1;
       } else {
         console.warn('No README found in package data');
-        return false;
+        return 0;
       }
     }
-    return false;
+    return 0;
   }
 
   /** 
@@ -217,7 +249,7 @@ export class Correctness {
 /** 
    * function to run the correctness checks.
    * */
-const url = ''; // add url here
+const url = 'https://github.com/hasansultan92/watch.js'; // add url here
 try {
   const parsedData = parseUrl(url);
   const correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');

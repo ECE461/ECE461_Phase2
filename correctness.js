@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -53,30 +53,69 @@ var Correctness = /** @class */ (function () {
         this.repoContents = null;
         this.packageData = null;
     }
+    Correctness.prototype.getCorrectnessScore = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var readme, stability, tests, linters, dependencies;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        // parse url?
+                        parseUrl('url here');
+                        // then fetch one data through github or npm
+                        this.fetchRepoContents();
+                        this.fetchPackageData();
+                        return [4 /*yield*/, this.checkReadme()];
+                    case 1:
+                        readme = _a.sent();
+                        stability = 0;
+                        return [4 /*yield*/, this.checkStability()];
+                    case 2:
+                        if ((_a.sent()) == true) {
+                            stability = 1;
+                        }
+                        tests = 0;
+                        return [4 /*yield*/, this.checkTests()];
+                    case 3:
+                        if ((_a.sent()) == true) {
+                            tests = 1;
+                        }
+                        linters = 0;
+                        return [4 /*yield*/, this.checkLinters()];
+                    case 4:
+                        if ((_a.sent()) == true) {
+                            linters = 1;
+                        }
+                        dependencies = 0;
+                        return [4 /*yield*/, this.checkDependencies()];
+                    case 5:
+                        if ((_a.sent()) == true) {
+                            dependencies = 1;
+                        }
+                        // calculate score
+                        return [2 /*return*/, (readme + stability + tests + linters + dependencies) / 5];
+                }
+            });
+        });
+    };
     /**
      * Fetches the contents of the github repository.
      * */
     Correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_1;
+            var git, http, fs, dir;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents"), {
-                                headers: {
-                                    Authorization: "token ".concat(this.githubToken)
-                                }
-                            })];
-                    case 1:
-                        response = _a.sent();
-                        this.repoContents = response.data;
-                        return [3 /*break*/, 3];
-                    case 2:
-                        error_1 = _a.sent();
-                        throw new Error("Failed to fetch repository contents: ".concat(error_1.response.statusText));
-                    case 3: return [2 /*return*/];
+                git = require('isomorphic-git');
+                http = require('isomorphic-git/http/node');
+                fs = require('fs');
+                dir = process.cwd() + 'test-clone';
+                try {
+                    git.clone({ fs: fs, http: http, dir: dir, url: '${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents', depth: 1 }).then(console.log('Repository cloned successfully!'));
                 }
+                catch (error) {
+                    console.error('Error:', error);
+                    throw new Error("Failed to fetch repository contents");
+                }
+                return [2 /*return*/];
             });
         });
     };
@@ -85,7 +124,7 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.fetchPackageData = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_2;
+            var response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -96,8 +135,9 @@ var Correctness = /** @class */ (function () {
                         this.packageData = response.data;
                         return [3 /*break*/, 3];
                     case 2:
-                        error_2 = _a.sent();
-                        throw new Error("Failed to fetch package data: ".concat(error_2.response.statusText));
+                        error_1 = _a.sent();
+                        console.log('Error:', error_1);
+                        throw new Error("Failed to fetch package data");
                     case 3: return [2 /*return*/];
                 }
             });
@@ -125,14 +165,14 @@ var Correctness = /** @class */ (function () {
                     case 4:
                         _a.sent();
                         if (this.packageData && this.packageData.readme) {
-                            return [2 /*return*/, true];
+                            return [2 /*return*/, 1];
                         }
                         else {
                             console.warn('No README found in package data');
-                            return [2 /*return*/, false];
+                            return [2 /*return*/, 0];
                         }
                         _a.label = 5;
-                    case 5: return [2 /*return*/, false];
+                    case 5: return [2 /*return*/, 0];
                 }
             });
         });
@@ -143,7 +183,7 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var releasesUrl, response, error_3;
+            var releasesUrl, response, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -161,8 +201,8 @@ var Correctness = /** @class */ (function () {
                         response = _a.sent();
                         return [2 /*return*/, response.data.length > 1];
                     case 3:
-                        error_3 = _a.sent();
-                        console.error('Error fetching releases:', error_3);
+                        error_2 = _a.sent();
+                        console.error('Error fetching releases:', error_2);
                         return [2 /*return*/, false];
                     case 4: return [3 /*break*/, 7];
                     case 5:
@@ -253,7 +293,7 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var packageJsonFile, response, packageJson, error_4, packageJson;
+            var packageJsonFile, response, packageJson, error_3, packageJson;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -281,8 +321,8 @@ var Correctness = /** @class */ (function () {
                         packageJson = response.data;
                         return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                     case 5:
-                        error_4 = _a.sent();
-                        console.error('Error fetching package.json from GitHub:', error_4);
+                        error_3 = _a.sent();
+                        console.error('Error fetching package.json from GitHub:', error_3);
                         return [2 /*return*/, false];
                     case 6: return [3 /*break*/, 9];
                     case 7:
@@ -361,7 +401,7 @@ function parseUrl(url) {
 /**
    * function to run the correctness checks.
    * */
-var url = ''; // add url here
+var url = 'https://github.com/hasansultan92/watch.js'; // add url here
 try {
     var parsedData = parseUrl(url);
     var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
