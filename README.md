@@ -11,6 +11,7 @@ Aidan Dannhausen-Brun committed
 
 
 Dependencies:
-Commander
-URL
-octokit/rest
+Commander   - CLI interface
+URL         - Parseing URL's
+axios       - API calls
+Jest        - for testing

@@ -38,8 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.license = void 0;
 var axios_1 = require("axios");
-var dotenv = require("dotenv");
-dotenv.config();
 var GITHUB_API = 'https://raw.githubusercontent.com';
 var license = /** @class */ (function () {
     /**
@@ -55,7 +53,7 @@ var license = /** @class */ (function () {
     /**
      * getFileContent returns a boolean if the file contains LGPLv2.1
      *
-     * @returns 0 or 1 if the LGPLv2.1 is in the file
+     * @returns a boolean if the LGPLv2.1 is in the file, null if there is an error
      */
     license.prototype.getFileContent = function (path) {
         return __awaiter(this, void 0, void 0, function () {
@@ -75,7 +73,8 @@ var license = /** @class */ (function () {
                         return [2 /*return*/, response.data.includes('LGPLv2.1')];
                     case 2:
                         error_1 = _a.sent();
-                        console.error("Error when fetching file content in ".concat(this.owner, "/").concat(this.repoName, ": ").concat(error_1));
+                        //console.error(`Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+                        //console.log(path);
                         return [2 /*return*/, null];
                     case 3: return [2 /*return*/];
                 }

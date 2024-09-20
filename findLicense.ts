@@ -1,9 +1,7 @@
 import axios from 'axios';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
 const GITHUB_API = 'https://raw.githubusercontent.com';
-
+const NPM_API = 'https://registry.npmjs.org';
 
 
 export class license {
@@ -24,11 +22,12 @@ export class license {
   /**
    * getFileContent returns a boolean if the file contains LGPLv2.1
    * 
-   * @returns 0 or 1 if the LGPLv2.1 is in the file
+   * @returns a boolean if the LGPLv2.1 is in the file, null if there is an error
    */
-  private async getFileContent(path: string) : Promise<string | null> {
+  private async getFileContent(path: string) : Promise<boolean | null> {
     try {
       const url = `${GITHUB_API}/${this.owner}/${this.repoName}/main/${path}`;
+      const license_list = ['LGPLv2.1', 'MIT License', 'Apache License 2.0', 'BSD 3-Clause License']
       const response = await axios.get(url, 
         {
           headers: {
@@ -36,10 +35,11 @@ export class license {
           }
         }
       );
-      return response.data.includes('LGPLv2.1');  
+      return response.data.includes(license_list);  
 
     } catch (error) {
-      console.error(`Error when fetching file content in ${this.owner}/${this.repoName}: ${error}`);
+      //console.error(`Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+      //console.log(path);
       return null;
     }
   }
