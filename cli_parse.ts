@@ -6,6 +6,11 @@ dotenv.config();
 
 const program = new Command();
 
+// Sanitize the URL to prevent command injection
+const sanitizeGitUrl = (url: string) => {
+    return url.replace(/[;`<>]/g, '');
+};
+
 // site hostnames
 /*
 let hostNPM:string  = 'npm.com';
@@ -24,8 +29,11 @@ program
   .description('CLI program takes in URL of a package and outputs measured metrics')
   .action(async (urlString: string) => {  
         try {
+            // Sanitize the URL to prevent command injection
+            const sanitized_urlString = sanitizeGitUrl(urlString);
+
             // Parse the URL
-            const parsedUrl = new URL(urlString);
+            const parsedUrl = new URL(sanitized_urlString);
             
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
