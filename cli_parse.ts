@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { URL } from 'url';
 import { MetricManager } from './MetricManager';
+import axios from 'axios';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,6 +10,46 @@ const program = new Command();
 // Sanitize the URL to prevent command injection
 const sanitizeGitUrl = (url: string) => {
     return url.replace(/[;`<>]/g, '');
+};
+
+// Function to check if the URL is from npm or GitHub
+const getRepoLink = async (url: string): Promise<string | null> => {
+    const npmRegex = /^https?:\/\/(www\.)?npmjs\.com\/package\/([^\/]+)$/;
+    const githubRegex = /^https?:\/\/(www\.)?github\.com\/([^\/]+\/[^\/]+)$/;
+
+    if (githubRegex.test(url)) {
+        return url;
+    } else if (npmRegex.test(url)) {
+        const match = url.match(npmRegex);
+        if (match) {
+            const packageName = match[2];
+            const npmApiUrl = `https://registry.npmjs.org/${packageName}`;
+            try {
+                const response = await axios.get(npmApiUrl, {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                });
+                const repoUrl = response.data.repository?.url;
+                if (repoUrl) {
+                    // Convert git+https URLs to https URLs
+                    repoUrl.replace(/^git\+/, '');
+                    if (repoUrl.endsWith('.git')) {
+                        let newrepoUrl = repoUrl.slice(0, -4);
+                        return newrepoUrl;
+                    }
+                    return repoUrl;
+                } else {
+                    console.error('No repository found for npm package:', packageName);
+                }
+            } catch (error) {
+                console.error('Error fetching npm package information:', error);
+            }
+        }
+    } else {
+        console.error('Invalid URL:', url);
+    }
+    return null;
 };
 
 // site hostnames
@@ -31,9 +72,14 @@ program
         try {
             // Sanitize the URL to prevent command injection
             const sanitized_urlString = sanitizeGitUrl(urlString);
-
+            const repoLink = await getRepoLink(sanitized_urlString);
+            if (!repoLink) {
+                console.error('Invalid URL:', urlString);
+                process.exit(1);
+            }
+            //console.log('\n\nRepository URL:', repoLink);
             // Parse the URL
-            const parsedUrl = new URL(sanitized_urlString);
+            const parsedUrl = new URL(repoLink);
             
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);

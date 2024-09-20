@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = require("commander");
 var url_1 = require("url");
 var MetricManager_1 = require("./MetricManager");
+var axios_1 = require("axios");
 var dotenv = require("dotenv");
 dotenv.config();
 var program = new commander_1.Command();
@@ -46,6 +47,59 @@ var program = new commander_1.Command();
 var sanitizeGitUrl = function (url) {
     return url.replace(/[;`<>]/g, '');
 };
+// Function to check if the URL is from npm or GitHub
+var getRepoLink = function (url) { return __awaiter(void 0, void 0, void 0, function () {
+    var npmRegex, githubRegex, match, packageName, npmApiUrl, response, repoUrl, newrepoUrl, error_1;
+    var _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                npmRegex = /^https?:\/\/(www\.)?npmjs\.com\/package\/([^\/]+)$/;
+                githubRegex = /^https?:\/\/(www\.)?github\.com\/([^\/]+\/[^\/]+)$/;
+                if (!githubRegex.test(url)) return [3 /*break*/, 1];
+                return [2 /*return*/, url];
+            case 1:
+                if (!npmRegex.test(url)) return [3 /*break*/, 6];
+                match = url.match(npmRegex);
+                if (!match) return [3 /*break*/, 5];
+                packageName = match[2];
+                npmApiUrl = "https://registry.npmjs.org/".concat(packageName);
+                _b.label = 2;
+            case 2:
+                _b.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, axios_1.default.get(npmApiUrl, {
+                        headers: {
+                            Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                        }
+                    })];
+            case 3:
+                response = _b.sent();
+                repoUrl = (_a = response.data.repository) === null || _a === void 0 ? void 0 : _a.url;
+                if (repoUrl) {
+                    // Convert git+https URLs to https URLs
+                    repoUrl.replace(/^git\+/, '');
+                    if (repoUrl.endsWith('.git')) {
+                        newrepoUrl = repoUrl.slice(0, -4);
+                        return [2 /*return*/, newrepoUrl];
+                    }
+                    return [2 /*return*/, repoUrl];
+                }
+                else {
+                    console.error('No repository found for npm package:', packageName);
+                }
+                return [3 /*break*/, 5];
+            case 4:
+                error_1 = _b.sent();
+                console.error('Error fetching npm package information:', error_1);
+                return [3 /*break*/, 5];
+            case 5: return [3 /*break*/, 7];
+            case 6:
+                console.error('Invalid URL:', url);
+                _b.label = 7;
+            case 7: return [2 /*return*/, null];
+        }
+    });
+}); };
 // site hostnames
 /*
 let hostNPM:string  = 'npm.com';
@@ -61,25 +115,32 @@ program
     .arguments('<url>')
     .description('CLI program takes in URL of a package and outputs measured metrics')
     .action(function (urlString) { return __awaiter(void 0, void 0, void 0, function () {
-    var sanitized_urlString, parsedUrl, Metrics, metrics, error_1;
+    var sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
+                _a.trys.push([0, 3, , 4]);
                 sanitized_urlString = sanitizeGitUrl(urlString);
-                parsedUrl = new url_1.URL(sanitized_urlString);
+                return [4 /*yield*/, getRepoLink(sanitized_urlString)];
+            case 1:
+                repoLink = _a.sent();
+                if (!repoLink) {
+                    console.error('Invalid URL:', urlString);
+                    process.exit(1);
+                }
+                parsedUrl = new url_1.URL(repoLink);
                 Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
                 return [4 /*yield*/, Metrics.getMetrics()];
-            case 1:
+            case 2:
                 metrics = _a.sent();
                 console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
-                return [3 /*break*/, 3];
-            case 2:
-                error_1 = _a.sent();
-                console.error('Invalid URL:', error_1.message);
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                console.error('Invalid URL:', error_2.message);
                 process.exit(1);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
