@@ -38,10 +38,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetricManager = void 0;
-var findLicense_1 = require("./findLicense");
+//import {request, gql} from 'graphql-request';
+var busFactor_1 = require("./busFactor");
+var rampUp_1 = require("./rampUp");
 var dotenv = require("dotenv");
 dotenv.config();
 var GITHUB_API = 'https://api.github.com/graphql';
+//const TOKEN = 'YOUR_GITHUB';
+var TOKEN = process.env.GITHUB_TOKEN;
 var MetricManager = /** @class */ (function () {
     /**
      * constructs a metrics manager for a GitHub repository
@@ -66,16 +70,21 @@ var MetricManager = /** @class */ (function () {
      */
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var licenseMetric, exists;
+            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        licenseMetric = new findLicense_1.license(this.owner, this.repoName);
-                        return [4 /*yield*/, licenseMetric.getRepoLicense()];
+                        busFactorMetric = new busFactor_1.busFactor(this.owner, this.repoName);
+                        return [4 /*yield*/, busFactorMetric.calculateBusFactor()];
                     case 1:
-                        exists = _a.sent();
-                        console.log("The License exists: ".concat(exists));
-                        return [2 /*return*/, 'hi'];
+                        busFactorValue = _a.sent();
+                        rampUpMetric = new rampUp_1.rampUp(this.owner, this.repoName);
+                        return [4 /*yield*/, rampUpMetric.getRepoStats()];
+                    case 2:
+                        rampUpValue = _a.sent();
+                        //console.log(busFactorValue);
+                        return [2 /*return*/, 'Contributors: ' + busFactorValue +
+                                '\n\n ' + 'Repo Stats: ' + rampUpValue];
                 }
             });
         });
