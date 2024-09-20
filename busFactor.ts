@@ -9,7 +9,7 @@ export class busFactor {
         this.repoName = repoName;
     }
 
-    public async calculateBusFactor(): Promise<string[]> {
+    public async calculateBusFactor(): Promise<number> {
         const twoYearsAgo = new Date();
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
 
@@ -23,15 +23,41 @@ export class busFactor {
                 }
             );
             const contributors = new Set<string>();
-
+            // Extract the author name from each commit
             response.data.forEach((commit: any) => {
                 contributors.add(commit.commit.author.name);
             });
+            //return Array.from(contributors);
+            const numberOfContributors = contributors.size;
+            const score = this.calculateBusFactorScore(numberOfContributors);
+            return score;
 
-            return Array.from(contributors);
         } catch (error) {
             console.error('Error fetching commits:', error);
             process.exit(1);
         }
     }
+
+    private calculateBusFactorScore(contributors: number): number {
+        // Calculate the bus factor score based on the number of contributors
+        let score = 0;
+        if (contributors >= 10) {
+            score = 1;
+        }
+        else if (contributors >= 5) {
+            score = 0.5;
+        }
+        else if (contributors >= 2) {
+            score = 0.3;
+        }
+        else if (contributors >= 1) {
+            score = 0.1;
+        }
+        else {
+            score = 0;
+        }
+
+        return score;
+    }
+
 }

@@ -1,6 +1,6 @@
 // takes info from API and outputs metrics
-import { busFactor } from "./BusFactor";
-import { maintainer } from "./Maintainer";
+import { busFactor } from "./busFactor";
+import { maintainer } from "./maintainer";
 import { rampUp } from "./rampUp";
 import { license } from "./findLicense";
 import { correctness } from "./correctness";
@@ -39,11 +39,16 @@ export class MetricManager {
         // get the bus factor
         let busFactorMetric = new busFactor(this.owner, this.repoName);
         let busFactorValue = await busFactorMetric.calculateBusFactor();
+        console.log(`The Bus Factor Score is: ${busFactorValue}`);
+
         let rampUpMetric = new rampUp(this.owner, this.repoName);
         let rampUpValue = await rampUpMetric.getRepoStats();
+        console.log(`The Repo Stats are: ${rampUpValue}`);
+
         let licenseMetric = new license(this.owner, this.repoName)
         let exists = await licenseMetric.getRepoLicense();
         console.log(`The License exists: ${exists}`);
+
         //console.log(busFactorValue);
         return 'Contributors: ' + busFactorValue + 
         '\n\n ' + 'Repo Stats: ' + rampUpValue;
