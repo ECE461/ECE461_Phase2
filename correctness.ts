@@ -23,60 +23,39 @@ export class Correctness {
     this.githubToken = process.env.GITHUB_TOKEN || '';
   }
 
+  /** 
+   * Calculates the correctness score of the repository or package.
+   * @returns {number} - the correctness score.
+   * */
+  
   public async getCorrectnessScore(): Promise<number> {
     await this.fetchRepoContents();
     await this.fetchPackageData();
 
     const readme = await this.checkReadme() ? 1 : 0;
-    console.log(`Readme check: ${readme}`);
-
     const stability = await this.checkStability() ? 1 : 0;
-    console.log(`Stability check: ${stability}`);
-
     const tests = await this.checkTests() ? 1 : 0;
-    console.log(`Tests check: ${tests}`);
-
     const linters = await this.checkLinters() ? 1 : 0;
-    console.log(`Linters check: ${linters}`);
-
     const dependencies = await this.checkDependencies() ? 1 : 0;
-    console.log(`Dependencies check: ${dependencies}`);
 
-    const totalChecks = 5; // Total number of checks performed
-    const totalScore = readme + stability + tests + linters + dependencies;
-    const finalScore = totalScore / totalChecks;
+    // Assign weights
+    const readmeWeight = 0.25;
+    const stabilityWeight = 0.25;
+    const testsWeight = 0.3;
+    const lintersWeight = 0.1;
+    const dependenciesWeight = 0.1;
 
-    console.log(`Final score: ${finalScore}`);
+    // Calculate weighted scores
+    const weightedReadme = readme * readmeWeight;
+    const weightedStability = stability * stabilityWeight;
+    const weightedTests = tests * testsWeight;
+    const weightedLinters = linters * lintersWeight;
+    const weightedDependencies = dependencies * dependenciesWeight;
+
+    // Calculate final score
+    const finalScore = weightedReadme + weightedStability + weightedTests
     return finalScore;
 }
-
-  //   await this.fetchRepoContents();
-  //   await this.fetchPackageData();
-  //
-  //   // run checks
-  //   const readme = await this.checkReadme();
-  //   var stability = 0;
-  //   if(await this.checkStability() == true) {
-  //     stability = 1;
-  //   }
-  //   var tests = 0;
-  //   if(await this.checkTests() == true) {
-  //     tests = 1;
-  //   }
-  //   var linters = 0;
-  //   if(await this.checkLinters() == true) {
-  //     linters = 1;
-  //   }
-  //   var dependencies = 0;
-  //   if(await this.checkDependencies() == true) {
-  //     dependencies = 1;
-  //   }
-
-  //   // calculate score
-  //   const final_score = (readme + stability + tests + linters + dependencies) / 5;
-  //   return final_score;
-  // }
-
   
   /** 
    * Fetches the contents of the github repository.
@@ -264,7 +243,7 @@ export class Correctness {
 /** 
    * function to run the correctness checks.
    * */
-const url = 'https://github.com/fishaudio/fish-speech'; // add url here
+const url = ''; // add url here
 try {
   const parsedData = parseUrl(url);
   const correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');

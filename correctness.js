@@ -52,9 +52,13 @@ var Correctness = /** @class */ (function () {
         this.packageVersion = packageVersion;
         this.githubToken = process.env.GITHUB_TOKEN || '';
     }
+    /**
+     * Calculates the correctness score of the repository or package.
+     * @returns {number} - the correctness score.
+     * */
     Correctness.prototype.getCorrectnessScore = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var readme, stability, tests, linters, dependencies, totalChecks, totalScore, finalScore;
+            var readme, stability, tests, linters, dependencies, readmeWeight, stabilityWeight, testsWeight, lintersWeight, dependenciesWeight, weightedReadme, weightedStability, weightedTests, weightedLinters, weightedDependencies, finalScore;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.fetchRepoContents()];
@@ -66,57 +70,34 @@ var Correctness = /** @class */ (function () {
                         return [4 /*yield*/, this.checkReadme()];
                     case 3:
                         readme = (_a.sent()) ? 1 : 0;
-                        console.log("Readme check: ".concat(readme));
                         return [4 /*yield*/, this.checkStability()];
                     case 4:
                         stability = (_a.sent()) ? 1 : 0;
-                        console.log("Stability check: ".concat(stability));
                         return [4 /*yield*/, this.checkTests()];
                     case 5:
                         tests = (_a.sent()) ? 1 : 0;
-                        console.log("Tests check: ".concat(tests));
                         return [4 /*yield*/, this.checkLinters()];
                     case 6:
                         linters = (_a.sent()) ? 1 : 0;
-                        console.log("Linters check: ".concat(linters));
                         return [4 /*yield*/, this.checkDependencies()];
                     case 7:
                         dependencies = (_a.sent()) ? 1 : 0;
-                        console.log("Dependencies check: ".concat(dependencies));
-                        totalChecks = 5;
-                        totalScore = readme + stability + tests + linters + dependencies;
-                        finalScore = totalScore / totalChecks;
-                        console.log("Final score: ".concat(finalScore));
+                        readmeWeight = 0.25;
+                        stabilityWeight = 0.25;
+                        testsWeight = 0.3;
+                        lintersWeight = 0.1;
+                        dependenciesWeight = 0.1;
+                        weightedReadme = readme * readmeWeight;
+                        weightedStability = stability * stabilityWeight;
+                        weightedTests = tests * testsWeight;
+                        weightedLinters = linters * lintersWeight;
+                        weightedDependencies = dependencies * dependenciesWeight;
+                        finalScore = weightedReadme + weightedStability + weightedTests;
                         return [2 /*return*/, finalScore];
                 }
             });
         });
     };
-    //   await this.fetchRepoContents();
-    //   await this.fetchPackageData();
-    //
-    //   // run checks
-    //   const readme = await this.checkReadme();
-    //   var stability = 0;
-    //   if(await this.checkStability() == true) {
-    //     stability = 1;
-    //   }
-    //   var tests = 0;
-    //   if(await this.checkTests() == true) {
-    //     tests = 1;
-    //   }
-    //   var linters = 0;
-    //   if(await this.checkLinters() == true) {
-    //     linters = 1;
-    //   }
-    //   var dependencies = 0;
-    //   if(await this.checkDependencies() == true) {
-    //     dependencies = 1;
-    //   }
-    //   // calculate score
-    //   const final_score = (readme + stability + tests + linters + dependencies) / 5;
-    //   return final_score;
-    // }
     /**
      * Fetches the contents of the github repository.
      * */
@@ -424,7 +405,7 @@ function parseUrl(url) {
 /**
    * function to run the correctness checks.
    * */
-var url = 'https://github.com/fishaudio/fish-speech'; // add url here
+var url = ''; // add url here
 try {
     var parsedData = parseUrl(url);
     var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
