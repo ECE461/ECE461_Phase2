@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@apollo/client": "^3.11.8",
     "@octokit/rest": "^21.0.2",
     "axios": "^1.7.7",
     "commander": "^7.2.0",
