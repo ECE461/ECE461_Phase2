@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
-import axios from 'axios';
+import 'es6-promise/auto';
+import 'isomorphic-fetch';
 
 dotenv.config();
 const GITHUB_API = 'https://api.github.com';
@@ -20,43 +21,67 @@ export class Correctness {
     this.packageName = packageName;
     this.packageVersion = packageVersion;
     this.githubToken = process.env.GITHUB_TOKEN || '';
-    this.repoContents = null;
-    this.packageData = null;
   }
 
+  /** 
+   * Calculates the correctness score of the repository or package.
+   * @returns {number} - the correctness score.
+   * */
+  
+  public async getCorrectnessScore(): Promise<number> {
+    await this.fetchRepoContents();
+    await this.fetchPackageData();
+
+    const readme = await this.checkReadme() ? 1 : 0;
+    const stability = await this.checkStability() ? 1 : 0;
+    const tests = await this.checkTests() ? 1 : 0;
+    const linters = await this.checkLinters() ? 1 : 0;
+    const dependencies = await this.checkDependencies() ? 1 : 0;
+
+    // Assign weights
+    const readmeWeight = 0.25;
+    const stabilityWeight = 0.25;
+    const testsWeight = 0.3;
+    const lintersWeight = 0.1;
+    const dependenciesWeight = 0.1;
+
+    // Calculate weighted scores
+    const weightedReadme = readme * readmeWeight;
+    const weightedStability = stability * stabilityWeight;
+    const weightedTests = tests * testsWeight;
+    const weightedLinters = linters * lintersWeight;
+    const weightedDependencies = dependencies * dependenciesWeight;
+
+    // Calculate final score
+    const finalScore = weightedReadme + weightedStability + weightedTests
+    return finalScore;
+}
+  
   /** 
    * Fetches the contents of the github repository.
    * */
   async fetchRepoContents() {
-    try {
-      const response = await axios.get(`${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents`, {
-        headers: {
-          Authorization: `token ${this.githubToken}`
-        }
-      });
-      this.repoContents = response.data;
-    } catch (error) {
-      throw new Error(`Failed to fetch repository contents: ${error.response.statusText}`);
-    }
+    const response = await fetch(`${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents`, {
+      headers: {
+        'Authorization': `token ${this.githubToken}`
+      }
+    });
+    this.repoContents = await response.json();
   }
 
   /** 
    * Fetches the contents of the npm package.
    * */
   async fetchPackageData() {
-    try {
-      const response = await axios.get(`${NPM_API}/${this.packageName}`);
-      this.packageData = response.data;
-    } catch (error) {
-      throw new Error(`Failed to fetch package data: ${error.response.statusText}`);
-    }
+    const response = await fetch(`${NPM_API}/${this.packageName}/${this.packageVersion}`);
+    this.packageData = await response.json();
   }
 
   /** 
    * Checks if the repository or package has a README file.
    * @returns {boolean} - true if README exists, false otherwise.
    * */
-  async checkReadme(): Promise<boolean> {
+  async checkReadme(): Promise<number> {
     if (this.owner && this.repoName) {
       if (!this.repoContents) {
         await this.fetchRepoContents();
@@ -65,13 +90,13 @@ export class Correctness {
     } else if (this.packageName) {
       await this.fetchPackageData();
       if (this.packageData && this.packageData.readme) {
-        return true;
+        return 1;
       } else {
         console.warn('No README found in package data');
-        return false;
+        return 0;
       }
     }
-    return false;
+    return 0;
   }
 
   /** 
@@ -82,25 +107,26 @@ export class Correctness {
     if (this.owner && this.repoName) {
       const releasesUrl = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/releases`;
       try {
-        const response = await axios.get(releasesUrl, {
+        const response = await fetch(releasesUrl, {
           headers: {
             'Authorization': `token ${this.githubToken}`
           }
         });
-        return response.data.length > 1;
-      } catch (error) {
-        console.error('Error fetching releases:', error);
-        return false;
-      }
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.versions) {
-        return Object.keys(this.packageData.versions).length > 1;
-      }
+        const data = await response.json();
+      return data.length > 1;
+    } catch (error) {
+      console.error('Error fetching releases:', error);
       return false;
+    }
+  } else if (this.packageName) {
+    await this.fetchPackageData();
+    if (this.packageData && this.packageData.versions) {
+      return Object.keys(this.packageData.versions).length > 1;
     }
     return false;
   }
+  return false;
+}
 
   /** 
    * Checks if the repository or package has test files.
@@ -160,12 +186,12 @@ export class Correctness {
         return false;
       }
       try {
-        const response = await axios.get(packageJsonFile.download_url, {
+        const response = await fetch(packageJsonFile.download_url, {
           headers: {
             'Authorization': `token ${this.githubToken}`
           }
         });
-        const packageJson = response.data;
+        const packageJson = await response.json();
         return Object.keys(packageJson.dependencies || {}).length > 0;
       } catch (error) {
         console.error('Error fetching package.json from GitHub:', error);
@@ -221,7 +247,11 @@ const url = ''; // add url here
 try {
   const parsedData = parseUrl(url);
   const correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
-  correctnessChecker.runChecks();
+  correctnessChecker.getCorrectnessScore().then(score => {
+    console.log('Correctness Score:', score);
+  }).catch(error => {
+    console.error('Error running correctness checks:', error);
+  });
 } catch (error) {
   console.error('Error parsing URL:', error);
 }

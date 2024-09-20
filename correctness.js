@@ -38,7 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Correctness = void 0;
 var dotenv = require("dotenv");
-var axios_1 = require("axios");
+require("es6-promise/auto");
+require("isomorphic-fetch");
 dotenv.config();
 var GITHUB_API = 'https://api.github.com';
 var NPM_API = 'https://registry.npmjs.org';
@@ -50,32 +51,73 @@ var Correctness = /** @class */ (function () {
         this.packageName = packageName;
         this.packageVersion = packageVersion;
         this.githubToken = process.env.GITHUB_TOKEN || '';
-        this.repoContents = null;
-        this.packageData = null;
     }
+    /**
+     * Calculates the correctness score of the repository or package.
+     * @returns {number} - the correctness score.
+     * */
+    Correctness.prototype.getCorrectnessScore = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var readme, stability, tests, linters, dependencies, readmeWeight, stabilityWeight, testsWeight, lintersWeight, dependenciesWeight, weightedReadme, weightedStability, weightedTests, weightedLinters, weightedDependencies, finalScore;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.fetchRepoContents()];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.checkReadme()];
+                    case 3:
+                        readme = (_a.sent()) ? 1 : 0;
+                        return [4 /*yield*/, this.checkStability()];
+                    case 4:
+                        stability = (_a.sent()) ? 1 : 0;
+                        return [4 /*yield*/, this.checkTests()];
+                    case 5:
+                        tests = (_a.sent()) ? 1 : 0;
+                        return [4 /*yield*/, this.checkLinters()];
+                    case 6:
+                        linters = (_a.sent()) ? 1 : 0;
+                        return [4 /*yield*/, this.checkDependencies()];
+                    case 7:
+                        dependencies = (_a.sent()) ? 1 : 0;
+                        readmeWeight = 0.25;
+                        stabilityWeight = 0.25;
+                        testsWeight = 0.3;
+                        lintersWeight = 0.1;
+                        dependenciesWeight = 0.1;
+                        weightedReadme = readme * readmeWeight;
+                        weightedStability = stability * stabilityWeight;
+                        weightedTests = tests * testsWeight;
+                        weightedLinters = linters * lintersWeight;
+                        weightedDependencies = dependencies * dependenciesWeight;
+                        finalScore = weightedReadme + weightedStability + weightedTests;
+                        return [2 /*return*/, finalScore];
+                }
+            });
+        });
+    };
     /**
      * Fetches the contents of the github repository.
      * */
     Correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents"), {
-                                headers: {
-                                    Authorization: "token ".concat(this.githubToken)
-                                }
-                            })];
+            var response, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents"), {
+                            headers: {
+                                'Authorization': "token ".concat(this.githubToken)
+                            }
+                        })];
                     case 1:
-                        response = _a.sent();
-                        this.repoContents = response.data;
-                        return [3 /*break*/, 3];
+                        response = _b.sent();
+                        _a = this;
+                        return [4 /*yield*/, response.json()];
                     case 2:
-                        error_1 = _a.sent();
-                        throw new Error("Failed to fetch repository contents: ".concat(error_1.response.statusText));
-                    case 3: return [2 /*return*/];
+                        _a.repoContents = _b.sent();
+                        return [2 /*return*/];
                 }
             });
         });
@@ -85,20 +127,17 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.fetchPackageData = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_2;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(NPM_API, "/").concat(this.packageName))];
+            var response, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(NPM_API, "/").concat(this.packageName, "/").concat(this.packageVersion))];
                     case 1:
-                        response = _a.sent();
-                        this.packageData = response.data;
-                        return [3 /*break*/, 3];
+                        response = _b.sent();
+                        _a = this;
+                        return [4 /*yield*/, response.json()];
                     case 2:
-                        error_2 = _a.sent();
-                        throw new Error("Failed to fetch package data: ".concat(error_2.response.statusText));
-                    case 3: return [2 /*return*/];
+                        _a.packageData = _b.sent();
+                        return [2 /*return*/];
                 }
             });
         });
@@ -125,14 +164,14 @@ var Correctness = /** @class */ (function () {
                     case 4:
                         _a.sent();
                         if (this.packageData && this.packageData.readme) {
-                            return [2 /*return*/, true];
+                            return [2 /*return*/, 1];
                         }
                         else {
                             console.warn('No README found in package data');
-                            return [2 /*return*/, false];
+                            return [2 /*return*/, 0];
                         }
                         _a.label = 5;
-                    case 5: return [2 /*return*/, false];
+                    case 5: return [2 /*return*/, 0];
                 }
             });
         });
@@ -143,38 +182,41 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var releasesUrl, response, error_3;
+            var releasesUrl, response, data, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.owner && this.repoName)) return [3 /*break*/, 5];
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 6];
                         releasesUrl = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/releases");
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(releasesUrl, {
+                        _a.trys.push([1, 4, , 5]);
+                        return [4 /*yield*/, fetch(releasesUrl, {
                                 headers: {
                                     'Authorization': "token ".concat(this.githubToken)
                                 }
                             })];
                     case 2:
                         response = _a.sent();
-                        return [2 /*return*/, response.data.length > 1];
+                        return [4 /*yield*/, response.json()];
                     case 3:
-                        error_3 = _a.sent();
-                        console.error('Error fetching releases:', error_3);
+                        data = _a.sent();
+                        return [2 /*return*/, data.length > 1];
+                    case 4:
+                        error_1 = _a.sent();
+                        console.error('Error fetching releases:', error_1);
                         return [2 /*return*/, false];
-                    case 4: return [3 /*break*/, 7];
-                    case 5:
-                        if (!this.packageName) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 5: return [3 /*break*/, 8];
                     case 6:
+                        if (!this.packageName) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 7:
                         _a.sent();
                         if (this.packageData && this.packageData.versions) {
                             return [2 /*return*/, Object.keys(this.packageData.versions).length > 1];
                         }
                         return [2 /*return*/, false];
-                    case 7: return [2 /*return*/, false];
+                    case 8: return [2 /*return*/, false];
                 }
             });
         });
@@ -253,11 +295,11 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var packageJsonFile, response, packageJson, error_4, packageJson;
+            var packageJsonFile, response, packageJson, error_2, packageJson;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.owner && this.repoName)) return [3 /*break*/, 7];
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 8];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
@@ -270,32 +312,34 @@ var Correctness = /** @class */ (function () {
                         }
                         _a.label = 3;
                     case 3:
-                        _a.trys.push([3, 5, , 6]);
-                        return [4 /*yield*/, axios_1.default.get(packageJsonFile.download_url, {
+                        _a.trys.push([3, 6, , 7]);
+                        return [4 /*yield*/, fetch(packageJsonFile.download_url, {
                                 headers: {
                                     'Authorization': "token ".concat(this.githubToken)
                                 }
                             })];
                     case 4:
                         response = _a.sent();
-                        packageJson = response.data;
-                        return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
+                        return [4 /*yield*/, response.json()];
                     case 5:
-                        error_4 = _a.sent();
-                        console.error('Error fetching package.json from GitHub:', error_4);
+                        packageJson = _a.sent();
+                        return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
+                    case 6:
+                        error_2 = _a.sent();
+                        console.error('Error fetching package.json from GitHub:', error_2);
                         return [2 /*return*/, false];
-                    case 6: return [3 /*break*/, 9];
-                    case 7:
-                        if (!this.packageName) return [3 /*break*/, 9];
-                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 7: return [3 /*break*/, 10];
                     case 8:
+                        if (!this.packageName) return [3 /*break*/, 10];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 9:
                         _a.sent();
                         if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
                             packageJson = this.packageData.versions[this.packageVersion];
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
                         return [2 /*return*/, false];
-                    case 9: return [2 /*return*/, false];
+                    case 10: return [2 /*return*/, false];
                 }
             });
         });
@@ -365,7 +409,11 @@ var url = ''; // add url here
 try {
     var parsedData = parseUrl(url);
     var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
-    correctnessChecker.runChecks();
+    correctnessChecker.getCorrectnessScore().then(function (score) {
+        console.log('Correctness Score:', score);
+    }).catch(function (error) {
+        console.error('Error running correctness checks:', error);
+    });
 }
 catch (error) {
     console.error('Error parsing URL:', error);
