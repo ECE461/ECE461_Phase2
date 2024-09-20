@@ -11,7 +11,7 @@ Aidan Dannhausen-Brun committed
 
 
 Dependencies:
-Commander
-URL
-graphql
-graphql-request
+Commander   - CLI interface
+URL         - Parseing URL's
+axios       - API calls
+Jest        - for testing

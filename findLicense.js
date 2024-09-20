@@ -36,47 +36,85 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.busFactor = void 0;
+exports.license = void 0;
 var axios_1 = require("axios");
-var busFactor = /** @class */ (function () {
-    function busFactor(repoOwner, repoName) {
-        this.repoOwner = repoOwner;
+var GITHUB_API = 'https://raw.githubusercontent.com';
+var license = /** @class */ (function () {
+    /**
+     * constructs a metrics manager for a GitHub repository
+     *
+     * @param owner the owner of the repository
+     * @param repoName the name of the repository
+     */
+    function license(owner, repoName) {
+        this.owner = owner;
         this.repoName = repoName;
     }
-    busFactor.prototype.calculateBusFactor = function () {
+    /**
+     * getFileContent returns a boolean if the file contains LGPLv2.1
+     *
+     * @returns a boolean if the LGPLv2.1 is in the file, null if there is an error
+     */
+    license.prototype.getFileContent = function (path) {
         return __awaiter(this, void 0, void 0, function () {
-            var twoYearsAgo, url, response, contributors_1, error_1;
+            var url, response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        twoYearsAgo = new Date();
-                        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-                        url = "https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/commits?since=").concat(twoYearsAgo.toISOString(), "&sha=main");
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
+                        _a.trys.push([0, 2, , 3]);
+                        url = "".concat(GITHUB_API, "/").concat(this.owner, "/").concat(this.repoName, "/main/").concat(path);
                         return [4 /*yield*/, axios_1.default.get(url, {
                                 headers: {
-                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                    'Authorization': "token ".concat(process.env.GITHUB_TOKEN)
                                 }
                             })];
-                    case 2:
+                    case 1:
                         response = _a.sent();
-                        contributors_1 = new Set();
-                        response.data.forEach(function (commit) {
-                            contributors_1.add(commit.commit.author.name);
-                        });
-                        return [2 /*return*/, Array.from(contributors_1)];
-                    case 3:
+                        return [2 /*return*/, response.data.includes('LGPLv2.1')];
+                    case 2:
                         error_1 = _a.sent();
-                        console.error('Error fetching commits:', error_1);
-                        process.exit(1);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        //console.error(`Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+                        //console.log(path);
+                        return [2 /*return*/, null];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
-    return busFactor;
+    /**
+     * getRepoLicense returns the license of the package
+     *
+     * @returns 1 if the license is LGPLv2.1, 0 otherwise
+     */
+    license.prototype.getRepoLicense = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, licenseFile, readMeFile, error_2;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, Promise.all([
+                                this.getFileContent('LICENSE'),
+                                this.getFileContent('README.md')
+                            ])];
+                    case 1:
+                        _a = _b.sent(), licenseFile = _a[0], readMeFile = _a[1];
+                        // checks if one or the other contains LGPLv2.1
+                        if (licenseFile || readMeFile) {
+                            //console.log('License Found: LGPLv2.1');
+                            return [2 /*return*/, 1];
+                        }
+                        //console.log('License Not Found');
+                        return [2 /*return*/, 0];
+                    case 2:
+                        error_2 = _b.sent();
+                        console.error("Error when fetching license in ".concat(this.owner, "/").concat(this.repoName, ": ").concat(error_2));
+                        return [2 /*return*/, 0];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return license;
 }());
-exports.busFactor = busFactor;
+exports.license = license;
