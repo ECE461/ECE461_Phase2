@@ -47,6 +47,11 @@ var GITHUB_API = 'https://api.github.com/graphql';
 //const TOKEN = 'YOUR_GITHUB';
 var TOKEN = process.env.GITHUB_TOKEN;
 var MetricManager = /** @class */ (function () {
+    /**
+     * constructs a metrics manager for a GitHub repository
+     *
+     * @param path the path from the URL of the GitHub repository
+     */
     function MetricManager(path) {
         // extracts owner and repository name from the URL
         var pathParts = path.split('/').filter(Boolean);
@@ -58,6 +63,11 @@ var MetricManager = /** @class */ (function () {
             throw new Error('Invalid GitHub repository URL');
         }
     }
+    /**
+     * get metrics calls all the metric classes and returns the net score of the package
+     *
+     * @returns the net score of the package
+     */
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
             var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue;
@@ -79,9 +89,19 @@ var MetricManager = /** @class */ (function () {
             });
         });
     };
+    /**
+     * getOwnwer returns the bus factor of the package
+     *
+     * @returns the Owner of the package
+     */
     MetricManager.prototype.getOwner = function () {
         return this.owner;
     };
+    /**
+     * getRepoName returns the repository name
+     *
+     * @returns the repository name
+     */
     MetricManager.prototype.getRepoName = function () {
         return this.repoName;
     };
