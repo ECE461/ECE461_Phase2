@@ -39,6 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.rampUp = void 0;
 var axios_1 = require("axios");
 var rampUp = /** @class */ (function () {
+    //private static readonly MAX_STARGAZERS_COUNT = 10000;
+    //private static readonly MAX_FORKS_COUNT = 10000;
     function rampUp(repoOwner, repoName) {
         this.repoOwner = repoOwner;
         this.repoName = repoName;
@@ -72,16 +74,16 @@ var rampUp = /** @class */ (function () {
                             lineCount: lineCount,
                             dependenciesCount: dependenciesCount,
                             size: size,
-                            stargazers_count: stargazers_count,
-                            forks_count: forks_count
+                            //stargazers_count,
+                            //forks_count
                         });
                         score = this.calculateScore({
                             fileCount: fileCount,
                             lineCount: lineCount,
                             dependenciesCount: dependenciesCount,
-                            size: size,
-                            stargazers_count: stargazers_count,
-                            forks_count: forks_count
+                            size: size
+                            //stargazers_count,
+                            //forks_count
                         });
                         return [2 /*return*/, parseFloat(score.toFixed(3))];
                     case 5:
@@ -98,7 +100,11 @@ var rampUp = /** @class */ (function () {
             var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/contents"))];
+                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/contents"), {
+                            headers: {
+                                Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                            }
+                        })];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response.data.length];
@@ -111,7 +117,11 @@ var rampUp = /** @class */ (function () {
             var response, tree, lineCount, _i, tree_1, file, fileResponse;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/git/trees/main?recursive=1"))];
+                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/git/trees/main?recursive=1"), {
+                            headers: {
+                                Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                            }
+                        })];
                     case 1:
                         response = _a.sent();
                         tree = response.data.tree;
@@ -122,7 +132,11 @@ var rampUp = /** @class */ (function () {
                         if (!(_i < tree_1.length)) return [3 /*break*/, 5];
                         file = tree_1[_i];
                         if (!(file.type === 'blob')) return [3 /*break*/, 4];
-                        return [4 /*yield*/, axios_1.default.get(file.url)];
+                        return [4 /*yield*/, axios_1.default.get(file.url, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 3:
                         fileResponse = _a.sent();
                         lineCount += fileResponse.data.content.split('\n').length;
@@ -142,7 +156,11 @@ var rampUp = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/contents/package.json"))];
+                        return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/contents/package.json"), {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 1:
                         response = _a.sent();
                         packageJson = JSON.parse(Buffer.from(response.data.content, 'base64').toString());
@@ -158,22 +176,24 @@ var rampUp = /** @class */ (function () {
         });
     };
     rampUp.prototype.calculateScore = function (stats) {
-        var fileCount = stats.fileCount, lineCount = stats.lineCount, dependenciesCount = stats.dependenciesCount, size = stats.size, stargazers_count = stats.stargazers_count, forks_count = stats.forks_count;
+        var fileCount = stats.fileCount, lineCount = stats.lineCount, dependenciesCount = stats.dependenciesCount, size = stats.size
+        //stargazers_count,
+        //forks_count
+        ;
         var fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
         var lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
         var dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
         var sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
-        var stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
-        var forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
-        var totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+        //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
+        //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
+        //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+        var totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
         return totalScore;
     };
     rampUp.MAX_FILE_COUNT = 1000;
     rampUp.MAX_LINE_COUNT = 100000;
     rampUp.MAX_DEPENDENCIES_COUNT = 100;
-    rampUp.MAX_SIZE = 100000; // in KB
-    rampUp.MAX_STARGAZERS_COUNT = 10000;
-    rampUp.MAX_FORKS_COUNT = 10000;
+    rampUp.MAX_SIZE = 10000000; // in KB
     return rampUp;
 }());
 exports.rampUp = rampUp;

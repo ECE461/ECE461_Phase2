@@ -6,9 +6,9 @@ export class rampUp {
     private static readonly MAX_FILE_COUNT = 1000;
     private static readonly MAX_LINE_COUNT = 100000;
     private static readonly MAX_DEPENDENCIES_COUNT = 100;
-    private static readonly MAX_SIZE = 100000; // in KB
-    private static readonly MAX_STARGAZERS_COUNT = 10000;
-    private static readonly MAX_FORKS_COUNT = 10000;
+    private static readonly MAX_SIZE = 10000000; // in KB
+    //private static readonly MAX_STARGAZERS_COUNT = 10000;
+    //private static readonly MAX_FORKS_COUNT = 10000;
 
     constructor(repoOwner: string, repoName: string) {
         this.repoOwner = repoOwner;
@@ -33,29 +33,21 @@ export class rampUp {
                 lineCount,
                 dependenciesCount,
                 size,
-                stargazers_count,
-                forks_count
+                //stargazers_count,
+                //forks_count
             });
 
             const score = this.calculateScore({
                 fileCount,
                 lineCount,
                 dependenciesCount,
-                size,
-                stargazers_count,
-                forks_count
+                size
+                //stargazers_count,
+                //forks_count
             });
 
             return parseFloat(score.toFixed(3));
 
-            return [
-                `File Count: ${fileCount}`,
-                ` Line Count: ${lineCount}`,
-                ` Dependencies Count: ${dependenciesCount}`,
-                ` Size: ${size}`,
-                ` Stargazers Count: ${stargazers_count}`,
-                ` Forks Count: ${forks_count}`
-            ];
         } catch (error) {
             console.error('Error fetching repository stats:', error);
         }
@@ -63,19 +55,31 @@ export class rampUp {
 
     private async getFileCount(): Promise<number> {
         // Implement logic to count files in the repository
-        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents`);
+        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents`, {
+            headers: {
+                Authorization: `token ${process.env.GITHUB_TOKEN}`
+            }
+        });
         return response.data.length;
     }
 
     private async getLineCount(): Promise<number> {
         // Implement logic to count lines of code in the repository
-        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/main?recursive=1`);
+        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/main?recursive=1`, {
+            headers: {
+                Authorization: `token ${process.env.GITHUB_TOKEN}`
+            }
+        });
         const tree = response.data.tree;
         let lineCount = 0;
 
         for (const file of tree) {
             if (file.type === 'blob') {
-            const fileResponse = await axios.get(file.url);
+            const fileResponse = await axios.get(file.url, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`
+                }
+            });
             lineCount += fileResponse.data.content.split('\n').length;
             }
         }
@@ -86,7 +90,11 @@ export class rampUp {
     private async getDependenciesCount(): Promise<number | undefined> {
         // Implement logic to count dependencies in the repository
         try {
-            const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/package.json`);
+            const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/package.json`, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`
+                }
+            });
             const packageJson = JSON.parse(Buffer.from(response.data.content, 'base64').toString());
             const dependencies = packageJson.dependencies || {};
 
@@ -102,26 +110,27 @@ export class rampUp {
         lineCount: number;
         dependenciesCount: number | undefined;
         size: number;
-        stargazers_count: number;
-        forks_count: number;
+        //stargazers_count: number;
+        //forks_count: number;
     }): number {
         const {
             fileCount,
             lineCount,
             dependenciesCount,
-            size,
-            stargazers_count,
-            forks_count
+            size
+            //stargazers_count,
+            //forks_count
         } = stats;
 
         const fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
         const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
         const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
         const sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
-        const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
-        const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
+        //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
+        //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
 
-        const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+        //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
+        const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
 
         return totalScore;
     }
