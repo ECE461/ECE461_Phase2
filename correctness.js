@@ -36,79 +36,118 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.correctness = void 0;
-var axios_1 = require("axios");
+exports.Correctness = void 0;
 var dotenv = require("dotenv");
+var axios_1 = require("axios");
 dotenv.config();
-var GITHUB_API = 'https://raw.githubusercontent.com';
-var correctness = /** @class */ (function () {
-    function correctness(owner, repoName) {
+var GITHUB_API = 'https://api.github.com';
+var NPM_API = 'https://registry.npmjs.org';
+var Correctness = /** @class */ (function () {
+    function Correctness(owner, repoName, packageName, packageVersion) {
+        if (packageVersion === void 0) { packageVersion = 'latest'; }
         this.owner = owner;
         this.repoName = repoName;
-        this.githubToken = process.env.GITHUB_TOKEN || ''; // replace with token
+        this.packageName = packageName;
+        this.packageVersion = packageVersion;
+        this.githubToken = process.env.GITHUB_TOKEN || '';
         this.repoContents = null;
+        this.packageData = null;
     }
     /**
-     * Fetches the repository contents from the GitHub API
-     * stores them in the `repoContents`
-     */
-    correctness.prototype.fetchRepoContents = function () {
+     * Fetches the contents of the github repository.
+     * */
+    Correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, response, error_1;
+            var response, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents");
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url, {
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.get("".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents"), {
                                 headers: {
-                                    'Authorization': "token ".concat(this.githubToken)
+                                    Authorization: "token ".concat(this.githubToken)
                                 }
                             })];
-                    case 2:
+                    case 1:
                         response = _a.sent();
                         this.repoContents = response.data;
-                        return [3 /*break*/, 4];
-                    case 3:
+                        return [3 /*break*/, 3];
+                    case 2:
                         error_1 = _a.sent();
-                        console.error('Error fetching repository contents:', error_1);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        throw new Error("Failed to fetch repository contents: ".concat(error_1.response.statusText));
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
     /**
-     * successfully checks if README exists
-     * @returns {Promise<boolean>} - true if README exists, false otherwise
+     * Fetches the contents of the npm package.
      * */
-    correctness.prototype.checkReadme = function () {
+    Correctness.prototype.fetchPackageData = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, axios_1.default.get("".concat(NPM_API, "/").concat(this.packageName))];
+                    case 1:
+                        response = _a.sent();
+                        this.packageData = response.data;
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_2 = _a.sent();
+                        throw new Error("Failed to fetch package data: ".concat(error_2.response.statusText));
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Checks if the repository or package has a README file.
+     * @returns {boolean} - true if README exists, false otherwise.
+     * */
+    Correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 3];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2: return [2 /*return*/, this.repoContents.some(function (file) { return file.name.toLowerCase() === 'readme.md'; })];
+                    case 3:
+                        if (!this.packageName) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 4:
+                        _a.sent();
+                        if (this.packageData && this.packageData.readme) {
+                            return [2 /*return*/, true];
+                        }
+                        else {
+                            console.warn('No README found in package data');
+                            return [2 /*return*/, false];
+                        }
+                        _a.label = 5;
+                    case 5: return [2 /*return*/, false];
                 }
             });
         });
     };
     /**
-     * checks if there are multiple releases or versions of the repo
-     * @returns {Promise<boolean>} - true if there are multiple releases, false otherwise
+     * Checks if the repository or package has more than one release.
+     * @returns {boolean} - true if there are more than one release, false otherwise.
      * */
-    correctness.prototype.checkStability = function () {
+    Correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var releasesUrl, response, error_2;
+            var releasesUrl, response, error_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 5];
                         releasesUrl = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/releases");
                         _a.label = 1;
                     case 1:
@@ -122,68 +161,103 @@ var correctness = /** @class */ (function () {
                         response = _a.sent();
                         return [2 /*return*/, response.data.length > 1];
                     case 3:
-                        error_2 = _a.sent();
-                        console.error('Error fetching releases:', error_2);
+                        error_3 = _a.sent();
+                        console.error('Error fetching releases:', error_3);
                         return [2 /*return*/, false];
-                    case 4: return [2 /*return*/];
+                    case 4: return [3 /*break*/, 7];
+                    case 5:
+                        if (!this.packageName) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 6:
+                        _a.sent();
+                        if (this.packageData && this.packageData.versions) {
+                            return [2 /*return*/, Object.keys(this.packageData.versions).length > 1];
+                        }
+                        return [2 /*return*/, false];
+                    case 7: return [2 /*return*/, false];
                 }
             });
         });
     };
     /**
-     * checks to see if there are any test files in the repo
-     * @returns {Promise<boolean>} - true if there are test files, false otherwise
+     * Checks if the repository or package has test files.
+     * @returns {boolean} - true if test files exist, false otherwise.
      * */
-    correctness.prototype.checkTests = function () {
+    Correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var testPatterns;
+            var testPatterns_1, testPatterns_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 3];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        testPatterns = [/test/i, /spec/i, /^__tests__$/i];
-                        return [2 /*return*/, this.repoContents.some(function (file) { return testPatterns.some(function (pattern) { return pattern.test(file.name); }); })];
+                        testPatterns_1 = [/test/i, /spec/i, /^__tests__$/i];
+                        return [2 /*return*/, this.repoContents.some(function (file) { return testPatterns_1.some(function (pattern) { return pattern.test(file.name); }); })];
+                    case 3:
+                        if (!this.packageName) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 4:
+                        _a.sent();
+                        if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
+                            testPatterns_2 = [/test/i, /spec/i, /^__tests__$/i];
+                            return [2 /*return*/, Object.keys(this.packageData.versions[this.packageVersion].dist).some(function (file) { return testPatterns_2.some(function (pattern) { return pattern.test(file); }); })];
+                        }
+                        return [2 /*return*/, false];
+                    case 5: return [2 /*return*/, false];
                 }
             });
         });
     };
     /**
-     * checks to see if there are any linters defined in the repo
-     * * @returns {Promise<boolean>} - true if there are linters, false otherwise
-    * */
-    correctness.prototype.checkLinters = function () {
+     * Checks if the repository or package has linter files.
+     * @returns {boolean} - true if linter files exist, false otherwise.
+     * */
+    Correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var linterFiles;
+            var linterFiles_1, linterFiles_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 3];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        linterFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
-                        return [2 /*return*/, this.repoContents.some(function (file) { return linterFiles.includes(file.name.toLowerCase()); })];
+                        linterFiles_1 = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
+                        return [2 /*return*/, this.repoContents.some(function (file) { return linterFiles_1.includes(file.name.toLowerCase()); })];
+                    case 3:
+                        if (!this.packageName) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 4:
+                        _a.sent();
+                        if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
+                            linterFiles_2 = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
+                            return [2 /*return*/, Object.keys(this.packageData.versions[this.packageVersion].dist).some(function (file) { return linterFiles_2.includes(file); })];
+                        }
+                        return [2 /*return*/, false];
+                    case 5: return [2 /*return*/, false];
                 }
             });
         });
     };
     /**
-      * checks to see if there are any dependencies defined in the repo
-      * * @returns {Promise<string[]>} - list of dependencies
+     * Checks if the repository or package has dependencies defined.
+     * @returns {boolean} - true if dependencies exist, false otherwise.
      * */
-    correctness.prototype.checkDependencies = function () {
+    Correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var packageJsonFile, url, response, packageJsonContent, packageJson, error_3;
+            var packageJsonFile, response, packageJson, error_4, packageJson;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 7];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
@@ -194,33 +268,42 @@ var correctness = /** @class */ (function () {
                         if (!packageJsonFile) {
                             return [2 /*return*/, false];
                         }
-                        url = packageJsonFile.download_url;
                         _a.label = 3;
                     case 3:
                         _a.trys.push([3, 5, , 6]);
-                        return [4 /*yield*/, axios_1.default.get(url, {
+                        return [4 /*yield*/, axios_1.default.get(packageJsonFile.download_url, {
                                 headers: {
                                     'Authorization': "token ".concat(this.githubToken)
                                 }
                             })];
                     case 4:
                         response = _a.sent();
-                        if (response.status === 200) {
-                            packageJsonContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
-                            packageJson = JSON.parse(packageJsonContent);
+                        packageJson = response.data;
+                        return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
+                    case 5:
+                        error_4 = _a.sent();
+                        console.error('Error fetching package.json from GitHub:', error_4);
+                        return [2 /*return*/, false];
+                    case 6: return [3 /*break*/, 9];
+                    case 7:
+                        if (!this.packageName) return [3 /*break*/, 9];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 8:
+                        _a.sent();
+                        if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
+                            packageJson = this.packageData.versions[this.packageVersion];
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
                         return [2 /*return*/, false];
-                    case 5:
-                        error_3 = _a.sent();
-                        return [2 /*return*/, false];
-                    case 6: return [2 /*return*/];
+                    case 9: return [2 /*return*/, false];
                 }
             });
         });
     };
-    /* TESTING FUNCTIONS */
-    correctness.prototype.runChecks = function () {
+    /**
+     * Runs all the checks and logs the results.
+     * */
+    Correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             return __generator(this, function (_r) {
@@ -256,16 +339,34 @@ var correctness = /** @class */ (function () {
             });
         });
     };
-    return correctness;
+    return Correctness;
 }());
-exports.correctness = correctness;
-var correctnessChecker = new correctness('mrdoob', 'three.js');
-// Testing:
-// const projectPath = 'https://github.com/swethatripuramallu/Custom-Music-Tune-Timer';
-// const projectPath = 'https://github.com/AidanMDB/ECE-461-Team'
-// const projectPath = 'https://github.com/fishaudio/fish-speech';
-// const projectPath = 'https://github.com/Allar/ue5-style-guide';
-//const correctnessChecker = new correctness(projectPath, 'msolinsky', 'ece30864-fall2024-lab3');
-var correctnessChecker = new correctness('fishaudio', 'fish-speech');
-// const correctnessChecker = new correctness(projectPath, 'fishaudio', 'fish-speech');
-correctnessChecker.runChecks();
+exports.Correctness = Correctness;
+/**
+ * Parses the URL to extract owner, repoName, packageName and packageVersion.
+ * */
+function parseUrl(url) {
+    var githubRegex = /github\.com\/([^\/]+)\/([^\/]+)/;
+    var npmRegex = /npmjs\.com\/package\/([^@]+)(?:@([^\/]+))?/;
+    var githubMatch = url.match(githubRegex);
+    if (githubMatch) {
+        return { owner: githubMatch[1], repoName: githubMatch[2] };
+    }
+    var npmMatch = url.match(npmRegex);
+    if (npmMatch) {
+        return { packageName: npmMatch[1], packageVersion: npmMatch[2] || 'latest' };
+    }
+    throw new Error('Invalid URL format');
+}
+/**
+   * function to run the correctness checks.
+   * */
+var url = ''; // add url here
+try {
+    var parsedData = parseUrl(url);
+    var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
+    correctnessChecker.runChecks();
+}
+catch (error) {
+    console.error('Error parsing URL:', error);
+}
