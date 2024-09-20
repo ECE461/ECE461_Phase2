@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
-import axios from 'axios';
+import 'es6-promise/auto';
+import 'isomorphic-fetch';
 
 dotenv.config();
 const GITHUB_API = 'https://api.github.com';
@@ -20,68 +21,81 @@ export class Correctness {
     this.packageName = packageName;
     this.packageVersion = packageVersion;
     this.githubToken = process.env.GITHUB_TOKEN || '';
-    this.repoContents = null;
-    this.packageData = null;
   }
 
   public async getCorrectnessScore(): Promise<number> {
-    // parse url?
-    parseUrl('url here');
+    await this.fetchRepoContents();
+    await this.fetchPackageData();
 
-    // then fetch one data through github or npm
-    this.fetchRepoContents();
-    this.fetchPackageData();
+    const readme = await this.checkReadme() ? 1 : 0;
+    console.log(`Readme check: ${readme}`);
 
-    // run checks
-    const readme = await this.checkReadme();
-    var stability = 0;
-    if(await this.checkStability() == true) {
-      stability = 1;
-    }
-    var tests = 0;
-    if(await this.checkTests() == true) {
-      tests = 1;
-    }
-    var linters = 0;
-    if(await this.checkLinters() == true) {
-      linters = 1;
-    }
-    var dependencies = 0;
-    if(await this.checkDependencies() == true) {
-      dependencies = 1;
-    }
+    const stability = await this.checkStability() ? 1 : 0;
+    console.log(`Stability check: ${stability}`);
 
-    // calculate score
-    return (readme + stability + tests + linters + dependencies) / 5;
-  }
+    const tests = await this.checkTests() ? 1 : 0;
+    console.log(`Tests check: ${tests}`);
+
+    const linters = await this.checkLinters() ? 1 : 0;
+    console.log(`Linters check: ${linters}`);
+
+    const dependencies = await this.checkDependencies() ? 1 : 0;
+    console.log(`Dependencies check: ${dependencies}`);
+
+    const totalChecks = 5; // Total number of checks performed
+    const totalScore = readme + stability + tests + linters + dependencies;
+    const finalScore = totalScore / totalChecks;
+
+    console.log(`Final score: ${finalScore}`);
+    return finalScore;
+}
+
+  //   await this.fetchRepoContents();
+  //   await this.fetchPackageData();
+  //
+  //   // run checks
+  //   const readme = await this.checkReadme();
+  //   var stability = 0;
+  //   if(await this.checkStability() == true) {
+  //     stability = 1;
+  //   }
+  //   var tests = 0;
+  //   if(await this.checkTests() == true) {
+  //     tests = 1;
+  //   }
+  //   var linters = 0;
+  //   if(await this.checkLinters() == true) {
+  //     linters = 1;
+  //   }
+  //   var dependencies = 0;
+  //   if(await this.checkDependencies() == true) {
+  //     dependencies = 1;
+  //   }
+
+  //   // calculate score
+  //   const final_score = (readme + stability + tests + linters + dependencies) / 5;
+  //   return final_score;
+  // }
+
+  
   /** 
    * Fetches the contents of the github repository.
    * */
   async fetchRepoContents() {
-    const git = require('isomorphic-git');
-    const http = require('isomorphic-git/http/node');
-    const fs = require('fs');
-    const dir = process.cwd() + 'test-clone';
-
-    try {
-      git.clone({ fs, http, dir, url: '${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents', depth: 1 }).then(console.log('Repository cloned successfully!'))
-    } catch (error) {
-      console.error('Error:', error);
-      throw new Error(`Failed to fetch repository contents`);
-    }
+    const response = await fetch(`${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents`, {
+      headers: {
+        'Authorization': `token ${this.githubToken}`
+      }
+    });
+    this.repoContents = await response.json();
   }
 
   /** 
    * Fetches the contents of the npm package.
    * */
   async fetchPackageData() {
-    try {
-      const response = await axios.get(`${NPM_API}/${this.packageName}`);
-      this.packageData = response.data;
-    } catch (error) {
-      console.log('Error:', error);
-      throw new Error(`Failed to fetch package data`);
-    }
+    const response = await fetch(`${NPM_API}/${this.packageName}/${this.packageVersion}`);
+    this.packageData = await response.json();
   }
 
   /** 
@@ -114,25 +128,26 @@ export class Correctness {
     if (this.owner && this.repoName) {
       const releasesUrl = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/releases`;
       try {
-        const response = await axios.get(releasesUrl, {
+        const response = await fetch(releasesUrl, {
           headers: {
             'Authorization': `token ${this.githubToken}`
           }
         });
-        return response.data.length > 1;
-      } catch (error) {
-        console.error('Error fetching releases:', error);
-        return false;
-      }
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.versions) {
-        return Object.keys(this.packageData.versions).length > 1;
-      }
+        const data = await response.json();
+      return data.length > 1;
+    } catch (error) {
+      console.error('Error fetching releases:', error);
       return false;
+    }
+  } else if (this.packageName) {
+    await this.fetchPackageData();
+    if (this.packageData && this.packageData.versions) {
+      return Object.keys(this.packageData.versions).length > 1;
     }
     return false;
   }
+  return false;
+}
 
   /** 
    * Checks if the repository or package has test files.
@@ -192,12 +207,12 @@ export class Correctness {
         return false;
       }
       try {
-        const response = await axios.get(packageJsonFile.download_url, {
+        const response = await fetch(packageJsonFile.download_url, {
           headers: {
             'Authorization': `token ${this.githubToken}`
           }
         });
-        const packageJson = response.data;
+        const packageJson = await response.json();
         return Object.keys(packageJson.dependencies || {}).length > 0;
       } catch (error) {
         console.error('Error fetching package.json from GitHub:', error);
@@ -249,11 +264,15 @@ export class Correctness {
 /** 
    * function to run the correctness checks.
    * */
-const url = 'https://github.com/hasansultan92/watch.js'; // add url here
+const url = 'https://github.com/fishaudio/fish-speech'; // add url here
 try {
   const parsedData = parseUrl(url);
   const correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
-  correctnessChecker.runChecks();
+  correctnessChecker.getCorrectnessScore().then(score => {
+    console.log('Correctness Score:', score);
+  }).catch(error => {
+    console.error('Error running correctness checks:', error);
+  });
 } catch (error) {
   console.error('Error parsing URL:', error);
 }

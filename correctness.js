@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -38,7 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Correctness = void 0;
 var dotenv = require("dotenv");
-var axios_1 = require("axios");
+require("es6-promise/auto");
+require("isomorphic-fetch");
 dotenv.config();
 var GITHUB_API = 'https://api.github.com';
 var NPM_API = 'https://registry.npmjs.org';
@@ -50,72 +51,93 @@ var Correctness = /** @class */ (function () {
         this.packageName = packageName;
         this.packageVersion = packageVersion;
         this.githubToken = process.env.GITHUB_TOKEN || '';
-        this.repoContents = null;
-        this.packageData = null;
     }
     Correctness.prototype.getCorrectnessScore = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var readme, stability, tests, linters, dependencies;
+            var readme, stability, tests, linters, dependencies, totalChecks, totalScore, finalScore;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        // parse url?
-                        parseUrl('url here');
-                        // then fetch one data through github or npm
-                        this.fetchRepoContents();
-                        this.fetchPackageData();
-                        return [4 /*yield*/, this.checkReadme()];
+                    case 0: return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
-                        readme = _a.sent();
-                        stability = 0;
-                        return [4 /*yield*/, this.checkStability()];
+                        _a.sent();
+                        return [4 /*yield*/, this.fetchPackageData()];
                     case 2:
-                        if ((_a.sent()) == true) {
-                            stability = 1;
-                        }
-                        tests = 0;
-                        return [4 /*yield*/, this.checkTests()];
+                        _a.sent();
+                        return [4 /*yield*/, this.checkReadme()];
                     case 3:
-                        if ((_a.sent()) == true) {
-                            tests = 1;
-                        }
-                        linters = 0;
-                        return [4 /*yield*/, this.checkLinters()];
+                        readme = (_a.sent()) ? 1 : 0;
+                        console.log("Readme check: ".concat(readme));
+                        return [4 /*yield*/, this.checkStability()];
                     case 4:
-                        if ((_a.sent()) == true) {
-                            linters = 1;
-                        }
-                        dependencies = 0;
-                        return [4 /*yield*/, this.checkDependencies()];
+                        stability = (_a.sent()) ? 1 : 0;
+                        console.log("Stability check: ".concat(stability));
+                        return [4 /*yield*/, this.checkTests()];
                     case 5:
-                        if ((_a.sent()) == true) {
-                            dependencies = 1;
-                        }
-                        // calculate score
-                        return [2 /*return*/, (readme + stability + tests + linters + dependencies) / 5];
+                        tests = (_a.sent()) ? 1 : 0;
+                        console.log("Tests check: ".concat(tests));
+                        return [4 /*yield*/, this.checkLinters()];
+                    case 6:
+                        linters = (_a.sent()) ? 1 : 0;
+                        console.log("Linters check: ".concat(linters));
+                        return [4 /*yield*/, this.checkDependencies()];
+                    case 7:
+                        dependencies = (_a.sent()) ? 1 : 0;
+                        console.log("Dependencies check: ".concat(dependencies));
+                        totalChecks = 5;
+                        totalScore = readme + stability + tests + linters + dependencies;
+                        finalScore = totalScore / totalChecks;
+                        console.log("Final score: ".concat(finalScore));
+                        return [2 /*return*/, finalScore];
                 }
             });
         });
     };
+    //   await this.fetchRepoContents();
+    //   await this.fetchPackageData();
+    //
+    //   // run checks
+    //   const readme = await this.checkReadme();
+    //   var stability = 0;
+    //   if(await this.checkStability() == true) {
+    //     stability = 1;
+    //   }
+    //   var tests = 0;
+    //   if(await this.checkTests() == true) {
+    //     tests = 1;
+    //   }
+    //   var linters = 0;
+    //   if(await this.checkLinters() == true) {
+    //     linters = 1;
+    //   }
+    //   var dependencies = 0;
+    //   if(await this.checkDependencies() == true) {
+    //     dependencies = 1;
+    //   }
+    //   // calculate score
+    //   const final_score = (readme + stability + tests + linters + dependencies) / 5;
+    //   return final_score;
+    // }
     /**
      * Fetches the contents of the github repository.
      * */
     Correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var git, http, fs, dir;
-            return __generator(this, function (_a) {
-                git = require('isomorphic-git');
-                http = require('isomorphic-git/http/node');
-                fs = require('fs');
-                dir = process.cwd() + 'test-clone';
-                try {
-                    git.clone({ fs: fs, http: http, dir: dir, url: '${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents', depth: 1 }).then(console.log('Repository cloned successfully!'));
+            var response, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/contents"), {
+                            headers: {
+                                'Authorization': "token ".concat(this.githubToken)
+                            }
+                        })];
+                    case 1:
+                        response = _b.sent();
+                        _a = this;
+                        return [4 /*yield*/, response.json()];
+                    case 2:
+                        _a.repoContents = _b.sent();
+                        return [2 /*return*/];
                 }
-                catch (error) {
-                    console.error('Error:', error);
-                    throw new Error("Failed to fetch repository contents");
-                }
-                return [2 /*return*/];
             });
         });
     };
@@ -124,21 +146,17 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.fetchPackageData = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, axios_1.default.get("".concat(NPM_API, "/").concat(this.packageName))];
+            var response, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, fetch("".concat(NPM_API, "/").concat(this.packageName, "/").concat(this.packageVersion))];
                     case 1:
-                        response = _a.sent();
-                        this.packageData = response.data;
-                        return [3 /*break*/, 3];
+                        response = _b.sent();
+                        _a = this;
+                        return [4 /*yield*/, response.json()];
                     case 2:
-                        error_1 = _a.sent();
-                        console.log('Error:', error_1);
-                        throw new Error("Failed to fetch package data");
-                    case 3: return [2 /*return*/];
+                        _a.packageData = _b.sent();
+                        return [2 /*return*/];
                 }
             });
         });
@@ -183,38 +201,41 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var releasesUrl, response, error_2;
+            var releasesUrl, response, data, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.owner && this.repoName)) return [3 /*break*/, 5];
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 6];
                         releasesUrl = "".concat(GITHUB_API, "/repos/").concat(this.owner, "/").concat(this.repoName, "/releases");
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(releasesUrl, {
+                        _a.trys.push([1, 4, , 5]);
+                        return [4 /*yield*/, fetch(releasesUrl, {
                                 headers: {
                                     'Authorization': "token ".concat(this.githubToken)
                                 }
                             })];
                     case 2:
                         response = _a.sent();
-                        return [2 /*return*/, response.data.length > 1];
+                        return [4 /*yield*/, response.json()];
                     case 3:
-                        error_2 = _a.sent();
-                        console.error('Error fetching releases:', error_2);
+                        data = _a.sent();
+                        return [2 /*return*/, data.length > 1];
+                    case 4:
+                        error_1 = _a.sent();
+                        console.error('Error fetching releases:', error_1);
                         return [2 /*return*/, false];
-                    case 4: return [3 /*break*/, 7];
-                    case 5:
-                        if (!this.packageName) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 5: return [3 /*break*/, 8];
                     case 6:
+                        if (!this.packageName) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 7:
                         _a.sent();
                         if (this.packageData && this.packageData.versions) {
                             return [2 /*return*/, Object.keys(this.packageData.versions).length > 1];
                         }
                         return [2 /*return*/, false];
-                    case 7: return [2 /*return*/, false];
+                    case 8: return [2 /*return*/, false];
                 }
             });
         });
@@ -293,11 +314,11 @@ var Correctness = /** @class */ (function () {
      * */
     Correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var packageJsonFile, response, packageJson, error_3, packageJson;
+            var packageJsonFile, response, packageJson, error_2, packageJson;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this.owner && this.repoName)) return [3 /*break*/, 7];
+                        if (!(this.owner && this.repoName)) return [3 /*break*/, 8];
                         if (!!this.repoContents) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
@@ -310,32 +331,34 @@ var Correctness = /** @class */ (function () {
                         }
                         _a.label = 3;
                     case 3:
-                        _a.trys.push([3, 5, , 6]);
-                        return [4 /*yield*/, axios_1.default.get(packageJsonFile.download_url, {
+                        _a.trys.push([3, 6, , 7]);
+                        return [4 /*yield*/, fetch(packageJsonFile.download_url, {
                                 headers: {
                                     'Authorization': "token ".concat(this.githubToken)
                                 }
                             })];
                     case 4:
                         response = _a.sent();
-                        packageJson = response.data;
-                        return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
+                        return [4 /*yield*/, response.json()];
                     case 5:
-                        error_3 = _a.sent();
-                        console.error('Error fetching package.json from GitHub:', error_3);
+                        packageJson = _a.sent();
+                        return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
+                    case 6:
+                        error_2 = _a.sent();
+                        console.error('Error fetching package.json from GitHub:', error_2);
                         return [2 /*return*/, false];
-                    case 6: return [3 /*break*/, 9];
-                    case 7:
-                        if (!this.packageName) return [3 /*break*/, 9];
-                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 7: return [3 /*break*/, 10];
                     case 8:
+                        if (!this.packageName) return [3 /*break*/, 10];
+                        return [4 /*yield*/, this.fetchPackageData()];
+                    case 9:
                         _a.sent();
                         if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
                             packageJson = this.packageData.versions[this.packageVersion];
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
                         return [2 /*return*/, false];
-                    case 9: return [2 /*return*/, false];
+                    case 10: return [2 /*return*/, false];
                 }
             });
         });
@@ -401,11 +424,15 @@ function parseUrl(url) {
 /**
    * function to run the correctness checks.
    * */
-var url = 'https://github.com/hasansultan92/watch.js'; // add url here
+var url = 'https://github.com/fishaudio/fish-speech'; // add url here
 try {
     var parsedData = parseUrl(url);
     var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
-    correctnessChecker.runChecks();
+    correctnessChecker.getCorrectnessScore().then(function (score) {
+        console.log('Correctness Score:', score);
+    }).catch(function (error) {
+        console.error('Error running correctness checks:', error);
+    });
 }
 catch (error) {
     console.error('Error parsing URL:', error);
