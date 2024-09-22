@@ -64,7 +64,8 @@ export class correctness {
     } catch (error) {
       console.error('CORRECTNESS -> Error removing repository directory:', error);
     }
-    return finalScore;
+    //return finalScore;
+    return parseFloat(finalScore.toFixed(3));
   }
 
   /** 

@@ -69,7 +69,7 @@ var busFactor = /** @class */ (function () {
                         });
                         numberOfContributors = contributors_1.size;
                         score = this.calculateBusFactorScore(numberOfContributors);
-                        return [2 /*return*/, score];
+                        return [2 /*return*/, parseFloat(score.toFixed(3))];
                     case 3:
                         error_1 = _a.sent();
                         console.error('BusFactor -> Error fetching commits:', error_1);
@@ -87,18 +87,18 @@ var busFactor = /** @class */ (function () {
             score = 1;
         }
         else if (contributors >= 5) {
-            score = 0.5;
+            score = 0.500;
         }
         else if (contributors >= 2) {
-            score = 0.3;
+            score = 0.300;
         }
         else if (contributors >= 1) {
-            score = 0.1;
+            score = 0.100;
         }
         else {
-            score = 0;
+            score = 0.000;
         }
-        return score;
+        return parseFloat(score.toFixed(3));
     };
     return busFactor;
 }());

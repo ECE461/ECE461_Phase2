@@ -44,6 +44,7 @@ var rampUp_1 = require("./rampUp");
 var findLicense_1 = require("./findLicense");
 var correctness_1 = require("./correctness");
 var dotenv = require("dotenv");
+var perf_hooks_1 = require("perf_hooks");
 dotenv.config();
 var MetricManager = /** @class */ (function () {
     /**
@@ -69,36 +70,46 @@ var MetricManager = /** @class */ (function () {
      */
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue, licenseMetric, exists, maintainerMetric, maintainerValue, correctnessMetric, correctnessValue;
+            var NetStartTime, startTime, busFactorMetric, busFactorValue, busFactorLatency, rampUpMetric, rampUpValue, rampUpLatency, licenseMetric, licenseValue, licenseLatency, maintainerMetric, maintainerValue, maintainerLatency, correctnessMetric, correctnessValue, correctnessLatency, netScore, netLatency;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        NetStartTime = perf_hooks_1.performance.now();
+                        startTime = perf_hooks_1.performance.now();
                         busFactorMetric = new busFactor_1.busFactor(this.owner, this.repoName);
                         return [4 /*yield*/, busFactorMetric.calculateBusFactor()];
                     case 1:
                         busFactorValue = _a.sent();
+                        busFactorLatency = (perf_hooks_1.performance.now() - startTime) / 1000;
+                        startTime = perf_hooks_1.performance.now();
                         rampUpMetric = new rampUp_1.rampUp(this.owner, this.repoName);
-                        return [4 /*yield*/, rampUpMetric.getRepoStats()];
+                        return [4 /*yield*/, rampUpMetric.getRampUpScore()];
                     case 2:
                         rampUpValue = _a.sent();
+                        rampUpLatency = (perf_hooks_1.performance.now() - startTime) / 1000;
+                        startTime = perf_hooks_1.performance.now();
                         licenseMetric = new findLicense_1.license(this.owner, this.repoName);
                         return [4 /*yield*/, licenseMetric.getRepoLicense()];
                     case 3:
-                        exists = _a.sent();
+                        licenseValue = _a.sent();
+                        licenseLatency = (perf_hooks_1.performance.now() - startTime) / 1000;
+                        startTime = perf_hooks_1.performance.now();
                         maintainerMetric = new maintainer_1.maintainer(this.owner, this.repoName);
                         return [4 /*yield*/, maintainerMetric.getMaintainerScore()];
                     case 4:
                         maintainerValue = _a.sent();
+                        maintainerLatency = (perf_hooks_1.performance.now() - startTime) / 1000;
+                        startTime = perf_hooks_1.performance.now();
                         correctnessMetric = new correctness_1.correctness(this.owner, this.repoName);
                         return [4 /*yield*/, correctnessMetric.getCorrectnessScore()];
                     case 5:
                         correctnessValue = _a.sent();
-                        console.log("The Correctness Score is: ".concat(correctnessValue));
+                        correctnessLatency = (perf_hooks_1.performance.now() - startTime) / 1000;
+                        netScore = (0.3 * busFactorValue + 0.2 * correctnessValue + 0.2 * rampUpValue + 0.3 * maintainerValue) * licenseValue;
+                        netLatency = (perf_hooks_1.performance.now() - NetStartTime) / 1000;
                         //console.log(busFactorValue);
-                        return [2 /*return*/, '\nContributors: ' + busFactorValue +
-                                '\n ' + 'Repo Stats: ' + rampUpValue
-                                + '\n ' + 'License: ' + exists
-                                + '\n ' + 'Maintainer: ' + maintainerValue];
+                        // parseFloat(score.toFixed(3));
+                        return [2 /*return*/, "\n        busFactorValue: ".concat(parseFloat(busFactorValue.toFixed(3)), " (Latency: ").concat(busFactorLatency.toFixed(3), " s)\n        rampUpValue: ").concat(parseFloat(rampUpValue.toFixed(3)), " (Latency: ").concat(rampUpLatency.toFixed(3), " s)\n        licenseValue: ").concat(parseFloat(licenseValue.toFixed(3)), " (Latency: ").concat(licenseLatency.toFixed(3), " s)\n        maintainerValue: ").concat(parseFloat(maintainerValue.toFixed(3)), " (Latency: ").concat(maintainerLatency.toFixed(3), " s)\n        correctnessValue: ").concat(parseFloat(correctnessValue.toFixed(3)), " (Latency: ").concat(correctnessLatency.toFixed(3), " s)\n        Net Score: ").concat(parseFloat(netScore.toFixed(3)), " (Latency: ").concat(netLatency.toFixed(3), " s)\n        ")];
                 }
             });
         });

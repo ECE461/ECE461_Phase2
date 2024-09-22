@@ -15,7 +15,7 @@ export class rampUp {
         this.repoName = repoName;
     }
 
-    async getRepoStats() {
+    public async getRampUpScore(): Promise<number> {
         try {
             const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}`, {
                 headers: {
@@ -50,6 +50,7 @@ export class rampUp {
 
         } catch (error) {
             console.error('RAMPUP -> Error fetching repository stats:', error);
+            return 0; // Return 0 in case of an error
         }
     }
 
@@ -87,7 +88,7 @@ export class rampUp {
         return lineCount;
     }
 */
-    private async getDependenciesCount(): Promise<number | undefined> {
+    private async getDependenciesCount(): Promise<number> {
         // Implement logic to count dependencies in the repository
         try {
             const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/package.json`, {
@@ -101,14 +102,14 @@ export class rampUp {
             return Object.keys(dependencies).length;
         } catch (error) {
             console.error('getDependenciesCount -> Error fetching dependencies count:', error);
-            return undefined; // Return undefined in case of an error
+            return 0; // Return undefined in case of an error
         }
     }
 
     private calculateScore(stats: {
         fileCount: number;
         //lineCount: number;
-        dependenciesCount: number | undefined;
+        dependenciesCount: number;
         size: number;
         //stargazers_count: number;
         //forks_count: number;
@@ -124,7 +125,8 @@ export class rampUp {
 
         const fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
         //const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
-        const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        //const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        const dependenciesCountScore = 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1);
         const sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
         //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
         //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
