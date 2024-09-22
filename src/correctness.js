@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -37,40 +37,44 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.correctness = void 0;
-var dotenv = require("dotenv");
+var fs = require("fs");
+var path = require("path");
 require("es6-promise/auto");
 require("isomorphic-fetch");
-var fs = require("fs");
-// import * as git from 'isomorphic-git';
-var git;
-(function () { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, Promise.resolve().then(function () { return require('isomorphic-git'); })];
-            case 1:
-                git = _a.sent();
-                return [2 /*return*/];
-        }
-    });
-}); })();
+var dotenv = require("dotenv");
 dotenv.config();
-// const GITHUB_API = 'https://api.github.com';
+var git;
+var http;
+function initializeGit() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, Promise.resolve().then(function () { return require('isomorphic-git'); })];
+                case 1:
+                    git = _a.sent();
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('isomorphic-git/http/node'); })];
+                case 2:
+                    http = _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 var correctness = /** @class */ (function () {
     function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
-        // this.githubToken = process.env.GITHUB_TOKEN || '';
-        // this.repoDir = path.join('/tmp', this.repoName);
-        // this.repoDir = '/tmp' + this.repoName;
+        this.githubToken = process.env.GITHUB_TOKEN || '';
+        this.repoDir = path.join('/tmp', "".concat(this.repoName, "-").concat(Date.now())); // Unique repo dir
         this.repoContents = [];
     }
     /**
-     * Calculates the correctness score of the repository or package.
-     * @returns {number} - the correctness score.
-     * */
+     * Collects and returns the correctness score of the repository
+     * @returns the correctness score of the repository
+     */
     correctness.prototype.getCorrectnessScore = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var readme, stability, tests, linters, dependencies, readmeWeight, stabilityWeight, testsWeight, lintersWeight, dependenciesWeight, weightedReadme, weightedStability, weightedTests, weightedLinters, weightedDependencies, finalScore;
+            var readme, stability, tests, linters, dependencies, readmeWeight, stabilityWeight, testsWeight, lintersWeight, dependenciesWeight, finalScore;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.fetchRepoContents()];
@@ -79,77 +83,83 @@ var correctness = /** @class */ (function () {
                         return [4 /*yield*/, this.checkReadme()];
                     case 2:
                         readme = (_a.sent()) ? 1 : 0;
-                        stability = 1;
-                        return [4 /*yield*/, this.checkTests()];
+                        return [4 /*yield*/, this.checkStability()];
                     case 3:
+                        stability = (_a.sent()) ? 1 : 0;
+                        return [4 /*yield*/, this.checkTests()];
+                    case 4:
                         tests = (_a.sent()) ? 1 : 0;
                         return [4 /*yield*/, this.checkLinters()];
-                    case 4:
+                    case 5:
                         linters = (_a.sent()) ? 1 : 0;
                         return [4 /*yield*/, this.checkDependencies()];
-                    case 5:
+                    case 6:
                         dependencies = (_a.sent()) ? 1 : 0;
                         readmeWeight = 0.2;
                         stabilityWeight = 0.25;
                         testsWeight = 0.3;
                         lintersWeight = 0.1;
                         dependenciesWeight = 0.15;
-                        weightedReadme = readme * readmeWeight;
-                        weightedStability = stability * stabilityWeight;
-                        weightedTests = tests * testsWeight;
-                        weightedLinters = linters * lintersWeight;
-                        weightedDependencies = dependencies * dependenciesWeight;
-                        finalScore = weightedReadme + weightedStability + weightedTests + weightedLinters + weightedDependencies;
+                        finalScore = readme * readmeWeight +
+                            stability * stabilityWeight +
+                            tests * testsWeight +
+                            linters * lintersWeight +
+                            dependencies * dependenciesWeight;
                         return [2 /*return*/, finalScore];
                 }
             });
         });
     };
     /**
-     * Fetches the contents of the github repository using git-isomorphic.
-     * */
+     * Fetches the contents of the repository
+     */
     correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var fs_1, http, dir, url, _a, error_1;
+            var dir, url, _a, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 3, , 4]);
-                        fs_1 = require('fs');
-                        http = require('isomorphic-git/http/node');
-                        dir = process.cwd() + '/tmp';
+                        _b.trys.push([0, 5, , 6]);
+                        dir = this.repoDir;
                         url = "https://github.com/".concat(this.owner, "/").concat(this.repoName);
+                        console.log('Checking if repository exists locally...');
+                        if (!!fs.existsSync(dir)) return [3 /*break*/, 2];
+                        console.log('Cloning the repository...');
                         return [4 /*yield*/, git.clone({
-                                fs: fs_1,
+                                fs: fs,
                                 http: http,
                                 dir: dir,
                                 url: url,
-                                depth: 1
-                                // onAuth: () => ({ username: this.githubToken })
+                                depth: 1,
                             })];
                     case 1:
                         _b.sent();
                         console.log('Repository cloned successfully!');
-                        // List the files in the repository
-                        _a = this;
-                        return [4 /*yield*/, git.listFiles({ fs: fs_1, dir: dir })];
+                        return [3 /*break*/, 3];
                     case 2:
-                        // List the files in the repository
-                        _a.repoContents = _b.sent();
-                        return [3 /*break*/, 4];
+                        console.log('Repository already exists locally.');
+                        _b.label = 3;
                     case 3:
+                        console.log('Listing files in the repository...');
+                        _a = this;
+                        return [4 /*yield*/, git.listFiles({ fs: fs, dir: dir })];
+                    case 4:
+                        _a.repoContents = _b.sent();
+                        console.log('Files listed successfully:', this.repoContents);
+                        return [3 /*break*/, 6];
+                    case 5:
                         error_1 = _b.sent();
                         console.error('Error fetching repository contents:', error_1);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        return [3 /*break*/, 6];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
     };
     /**
-     * Checks if the repository or package has a README file.
-     * @returns {boolean} - true if README exists, false otherwise.
-     * */
+     *
+     * @returns true if README file exists in the repository, false otherwise
+     */
     correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -160,34 +170,36 @@ var correctness = /** @class */ (function () {
                     case 1:
                         _a.sent();
                         _a.label = 2;
-                    case 2: return [2 /*return*/, this.repoContents.some(function (file) { return file.toLowerCase() === 'readme.md'; })];
+                    case 2:
+                        console.log('Checking for README...');
+                        return [2 /*return*/, this.repoContents.some(function (file) { return file.toLowerCase() === 'readme.md'; })];
                 }
             });
         });
     };
     /**
-     * Checks if the repository or package has more than one release.
-     * @returns {boolean} - true if there are more than one release, false otherwise.
-     * */
+     *
+     * @returns true if the repository has more than one version or release, false otherwise
+     */
     correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
             var releasesUrl, response, releases, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        releasesUrl = "{https://api.github.com/}repos/".concat(this.owner, "/").concat(this.repoName, "/releases");
+                        releasesUrl = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName, "/releases");
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
                         return [4 /*yield*/, fetch(releasesUrl, {
-                            // headers: {
-                            //   Authorization: `token ${this.githubToken}`
-                            // }
+                                headers: {
+                                    Authorization: "token ".concat(this.githubToken)
+                                }
                             })];
                     case 2:
                         response = _a.sent();
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error("Network response was not ok: ".concat(response.statusText));
                         }
                         return [4 /*yield*/, response.json()];
                     case 3:
@@ -196,15 +208,15 @@ var correctness = /** @class */ (function () {
                     case 4:
                         error_2 = _a.sent();
                         console.error('Error fetching releases:', error_2);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/, false];
+                        return [2 /*return*/, false];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
     };
     /**
-     * Checks if the repository has test files.
-     * @returns {boolean} - true if test files exist, false otherwise.
+     *
+     * @returns true if the repository has test files, false otherwise
      */
     correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -212,22 +224,22 @@ var correctness = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!!this.repoContents) return [3 /*break*/, 2];
+                        if (!!this.repoContents.length) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.fetchRepoContents()];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2:
                         testPatterns = [/test/i, /spec/i, /^__tests__$/i];
-                        return [2 /*return*/, this.repoContents.some(function (file) { return testPatterns.some(function (pattern) { return pattern.test(file.name); }); })];
+                        return [2 /*return*/, this.repoContents.some(function (file) { return testPatterns.some(function (pattern) { return pattern.test(file); }); })];
                 }
             });
         });
     };
     /**
-     * Checks if the repository or package has linter files.
-     * @returns {boolean} - true if linter files exist, false otherwise.
-     * */
+     *
+     * @returns true if the repository has linter configuration files, false otherwise
+     */
     correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
             var linterFiles;
@@ -240,16 +252,21 @@ var correctness = /** @class */ (function () {
                         _a.sent();
                         _a.label = 2;
                     case 2:
-                        linterFiles = ['.eslintrc', '.eslintrc.json', '.eslintrc.js', '.eslintignore', '.stylelintrc', '.stylelintrc.json', '.stylelintrc.js', '.stylelintignore'];
+                        linterFiles = [
+                            '.eslintrc', '.eslintrc.json', '.eslintrc.js',
+                            '.eslintignore', '.stylelintrc',
+                            '.stylelintrc.json', '.stylelintrc.js',
+                            '.stylelintignore'
+                        ];
                         return [2 /*return*/, this.repoContents.some(function (file) { return linterFiles.includes(file.toLowerCase()); })];
                 }
             });
         });
     };
     /**
-     * Checks if the repository or package has dependencies defined.
-     * @returns {boolean} - true if dependencies exist, false otherwise.
-     * */
+     *
+     * @returns true if the repository has dependencies defined in package.json, false otherwise
+     */
     correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
             var packageJsonFile, packageJsonPath, packageJson;
@@ -264,10 +281,11 @@ var correctness = /** @class */ (function () {
                     case 2:
                         packageJsonFile = this.repoContents.find(function (file) { return file.toLowerCase() === 'package.json'; });
                         if (!packageJsonFile) {
+                            console.error('package.json not found');
                             return [2 /*return*/, false];
                         }
                         try {
-                            packageJsonPath = packageJsonFile;
+                            packageJsonPath = path.join(this.repoDir, packageJsonFile);
                             packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
@@ -281,39 +299,49 @@ var correctness = /** @class */ (function () {
         });
     };
     /**
-     * Runs all the checks and logs the results.
-     * */
+     * Runs all the checks and logs the results
+     */
     correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             return __generator(this, function (_r) {
                 switch (_r.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, this.fetchRepoContents()];
+                    case 1:
+                        _r.sent();
                         _b = (_a = console).log;
                         _c = ['README exists:'];
                         return [4 /*yield*/, this.checkReadme()];
-                    case 1:
+                    case 2:
                         _b.apply(_a, _c.concat([_r.sent()]));
                         _e = (_d = console).log;
                         _f = ['Stability (version exists):'];
                         return [4 /*yield*/, this.checkStability()];
-                    case 2:
+                    case 3:
                         _e.apply(_d, _f.concat([_r.sent()]));
                         _h = (_g = console).log;
                         _j = ['Tests defined:'];
                         return [4 /*yield*/, this.checkTests()];
-                    case 3:
+                    case 4:
                         _h.apply(_g, _j.concat([_r.sent()]));
                         _l = (_k = console).log;
                         _m = ['Linters defined:'];
                         return [4 /*yield*/, this.checkLinters()];
-                    case 4:
+                    case 5:
                         _l.apply(_k, _m.concat([_r.sent()]));
                         _p = (_o = console).log;
                         _q = ['Dependencies defined:'];
                         return [4 /*yield*/, this.checkDependencies()];
-                    case 5:
+                    case 6:
                         _p.apply(_o, _q.concat([_r.sent()]));
+                        // Cleanup: Remove the repository directory
+                        try {
+                            fs.rmdirSync(this.repoDir, { recursive: true });
+                            console.log('Repository directory removed successfully.');
+                        }
+                        catch (error) {
+                            console.error('Error removing repository directory:', error);
+                        }
                         return [2 /*return*/];
                 }
             });
@@ -322,8 +350,10 @@ var correctness = /** @class */ (function () {
     return correctness;
 }());
 exports.correctness = correctness;
-// Test the correctness class:
-var owner = 'AidanMDB';
-var repoName = 'ECE-461-Team';
-var checker = new correctness(owner, repoName);
-checker.getCorrectnessScore().then(function (score) { return console.log("Correctness Score: ".concat(score)); });
+// Initialize and run the checks
+initializeGit().then(function () {
+    var owner = ''; // Replace with actual owner name
+    var repoName = ''; // Replace with actual repository name
+    var checker = new correctness(owner, repoName);
+    checker.getCorrectnessScore().then(function (score) { return console.log("Correctness Score: ".concat(score)); });
+});
