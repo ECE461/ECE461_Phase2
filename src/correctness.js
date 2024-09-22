@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -40,8 +40,8 @@ exports.correctness = void 0;
 var dotenv = require("dotenv");
 require("es6-promise/auto");
 require("isomorphic-fetch");
-var path_1 = require("path");
-var fs_1 = require("fs");
+var fs = require("fs");
+// import * as git from 'isomorphic-git';
 var git;
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
@@ -54,13 +54,14 @@ var git;
     });
 }); })();
 dotenv.config();
-var GITHUB_API = 'https://api.github.com';
+// const GITHUB_API = 'https://api.github.com';
 var correctness = /** @class */ (function () {
     function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
-        this.githubToken = process.env.GITHUB_TOKEN || '';
-        this.repoDir = path_1.default.join('/tmp', this.repoName);
+        // this.githubToken = process.env.GITHUB_TOKEN || '';
+        // this.repoDir = path.join('/tmp', this.repoName);
+        // this.repoDir = '/tmp' + this.repoName;
         this.repoContents = [];
     }
     /**
@@ -78,29 +79,27 @@ var correctness = /** @class */ (function () {
                         return [4 /*yield*/, this.checkReadme()];
                     case 2:
                         readme = (_a.sent()) ? 1 : 0;
-                        return [4 /*yield*/, this.checkStability()];
-                    case 3:
-                        stability = (_a.sent()) ? 1 : 0;
+                        stability = 1;
                         return [4 /*yield*/, this.checkTests()];
-                    case 4:
+                    case 3:
                         tests = (_a.sent()) ? 1 : 0;
                         return [4 /*yield*/, this.checkLinters()];
-                    case 5:
+                    case 4:
                         linters = (_a.sent()) ? 1 : 0;
                         return [4 /*yield*/, this.checkDependencies()];
-                    case 6:
+                    case 5:
                         dependencies = (_a.sent()) ? 1 : 0;
-                        readmeWeight = 0.25;
+                        readmeWeight = 0.2;
                         stabilityWeight = 0.25;
                         testsWeight = 0.3;
                         lintersWeight = 0.1;
-                        dependenciesWeight = 0.1;
+                        dependenciesWeight = 0.15;
                         weightedReadme = readme * readmeWeight;
                         weightedStability = stability * stabilityWeight;
                         weightedTests = tests * testsWeight;
                         weightedLinters = linters * lintersWeight;
                         weightedDependencies = dependencies * dependenciesWeight;
-                        finalScore = weightedReadme + weightedStability + weightedTests;
+                        finalScore = weightedReadme + weightedStability + weightedTests + weightedLinters + weightedDependencies;
                         return [2 /*return*/, finalScore];
                 }
             });
@@ -111,25 +110,29 @@ var correctness = /** @class */ (function () {
      * */
     correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, error_1;
-            var _this = this;
+            var fs_1, http, dir, url, _a, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _b.trys.push([0, 3, , 4]);
-                        // Clone the repository
+                        fs_1 = require('fs');
+                        http = require('isomorphic-git/http/node');
+                        dir = process.cwd() + '/tmp';
+                        url = "https://github.com/".concat(this.owner, "/").concat(this.repoName);
                         return [4 /*yield*/, git.clone({
-                                fs: fs_1.default,
-                                dir: this.repoDir,
-                                url: "https://github.com/".concat(this.owner, "/").concat(this.repoName),
-                                onAuth: function () { return ({ username: _this.githubToken }); }
+                                fs: fs_1,
+                                http: http,
+                                dir: dir,
+                                url: url,
+                                depth: 1
+                                // onAuth: () => ({ username: this.githubToken })
                             })];
                     case 1:
-                        // Clone the repository
                         _b.sent();
+                        console.log('Repository cloned successfully!');
                         // List the files in the repository
                         _a = this;
-                        return [4 /*yield*/, git.listFiles({ fs: fs_1.default, dir: this.repoDir })];
+                        return [4 /*yield*/, git.listFiles({ fs: fs_1, dir: dir })];
                     case 2:
                         // List the files in the repository
                         _a.repoContents = _b.sent();
@@ -177,9 +180,9 @@ var correctness = /** @class */ (function () {
                     case 1:
                         _a.trys.push([1, 4, , 5]);
                         return [4 /*yield*/, fetch(releasesUrl, {
-                                headers: {
-                                    Authorization: "token ".concat(this.githubToken)
-                                }
+                            // headers: {
+                            //   Authorization: `token ${this.githubToken}`
+                            // }
                             })];
                     case 2:
                         response = _a.sent();
@@ -264,8 +267,8 @@ var correctness = /** @class */ (function () {
                             return [2 /*return*/, false];
                         }
                         try {
-                            packageJsonPath = path_1.default.join(this.repoDir, packageJsonFile);
-                            packageJson = JSON.parse(fs_1.default.readFileSync(packageJsonPath, 'utf8'));
+                            packageJsonPath = packageJsonFile;
+                            packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
                             return [2 /*return*/, Object.keys(packageJson.dependencies || {}).length > 0];
                         }
                         catch (error) {

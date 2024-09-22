@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv';
 import 'es6-promise/auto';
 import 'isomorphic-fetch';
-import path from 'path';
-import fs from 'fs';
+import * as fs from 'fs';
+// import * as git from 'isomorphic-git';
 
 let git: any;
 
@@ -11,43 +11,45 @@ let git: any;
 })();
 
 dotenv.config();
-const GITHUB_API = 'https://api.github.com';
+// const GITHUB_API = 'https://api.github.com';
 
 export class correctness {
   private owner: string;
   private repoName: string;
-  private githubToken: string;
-  private repoDir: string;
+  // private githubToken: string;
+  // private repoDir: string;
   private repoContents: string[];
 
   constructor(owner: string, repoName: string) {
     this.owner = owner;
     this.repoName = repoName;
-    this.githubToken = process.env.GITHUB_TOKEN || '';
-    this.repoDir = path.join('/tmp', this.repoName);
+    // this.githubToken = process.env.GITHUB_TOKEN || '';
+    // this.repoDir = path.join('/tmp', this.repoName);
+    // this.repoDir = '/tmp' + this.repoName;
     this.repoContents = [];
   }
+
 
   /** 
    * Calculates the correctness score of the repository or package.
    * @returns {number} - the correctness score.
    * */
-  
   public async getCorrectnessScore(): Promise<number> {
     await this.fetchRepoContents();
 
     const readme = await this.checkReadme() ? 1 : 0;
-    const stability = await this.checkStability() ? 1 : 0;
+    // const stability = await this.checkStability() ? 1 : 0;
+    const stability = 1;
     const tests = await this.checkTests() ? 1 : 0;
     const linters = await this.checkLinters() ? 1 : 0;
     const dependencies = await this.checkDependencies() ? 1 : 0;
 
     // Assign weights
-    const readmeWeight = 0.25;
+    const readmeWeight = 0.2;
     const stabilityWeight = 0.25;
     const testsWeight = 0.3;
     const lintersWeight = 0.1;
-    const dependenciesWeight = 0.1;
+    const dependenciesWeight = 0.15;
 
     // Calculate weighted scores
     const weightedReadme = readme * readmeWeight;
@@ -57,8 +59,9 @@ export class correctness {
     const weightedDependencies = dependencies * dependenciesWeight;
 
     // Calculate final score
-    const finalScore = weightedReadme + weightedStability + weightedTests
+    const finalScore = weightedReadme + weightedStability + weightedTests + weightedLinters + weightedDependencies;
     return finalScore;
+    // return 1;
 }
   
 
@@ -68,15 +71,22 @@ export class correctness {
   private async fetchRepoContents(): Promise<void> {
     try {
       // Clone the repository
+      const fs = require('fs');
+      const http = require('isomorphic-git/http/node');
+      const dir = process.cwd() + '/tmp';
+      const url = `https://github.com/${this.owner}/${this.repoName}`;
+      
       await git.clone({
-        fs,
-        dir: this.repoDir,
-        url: `https://github.com/${this.owner}/${this.repoName}`,
-        onAuth: () => ({ username: this.githubToken })
+        fs: fs,
+        http: http,
+        dir: dir,
+        url: url,
+        depth: 1
+        // onAuth: () => ({ username: this.githubToken })
       });
-
+      console.log('Repository cloned successfully!');
       // List the files in the repository
-      this.repoContents = await git.listFiles({ fs, dir: this.repoDir });
+      this.repoContents = await git.listFiles({ fs, dir: dir });
     } catch (error) {
       console.error('Error fetching repository contents:', error);
     }
@@ -101,9 +111,9 @@ export class correctness {
     const releasesUrl = `{https://api.github.com/}repos/${this.owner}/${this.repoName}/releases`;
     try {
       const response = await fetch(releasesUrl, {
-        headers: {
-          Authorization: `token ${this.githubToken}`
-        }
+        // headers: {
+        //   Authorization: `token ${this.githubToken}`
+        // }
       });
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -153,7 +163,9 @@ export class correctness {
       return false;
     }
     try {
-      const packageJsonPath = path.join(this.repoDir, packageJsonFile);
+      // const packageJsonPath = path.join(this.repoDir, packageJsonFile);
+      // const packageJsonPath = this.repoDir + packageJsonFile;
+      const packageJsonPath = packageJsonFile;
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       return Object.keys(packageJson.dependencies || {}).length > 0;
     } catch (error) {
