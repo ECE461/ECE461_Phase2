@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const GITHUB_API = 'https://raw.githubusercontent.com';
-const NPM_API = 'https://registry.npmjs.org';
+// const NPM_API = 'https://registry.npmjs.org';
 
 
 export class license {
@@ -27,7 +27,7 @@ export class license {
   private async getFileContent(path: string) : Promise<boolean | null> {
     try {
       const url = `${GITHUB_API}/${this.owner}/${this.repoName}/main/${path}`;
-      const license_list = ['LGPLv2.1', 'MIT License', 'Apache License 2.0', 'BSD 3-Clause License']
+      const license_list = ['LGPLv2.1', 'MIT license', 'Apache License 2.0', 'BSD 3-Clause License']
       const response = await axios.get(url, 
         {
           headers: {
