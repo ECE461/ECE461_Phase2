@@ -17,9 +17,11 @@
     "commander": "^7.2.0",
     "dotenv": "^16.4.5",
     "es6-promise": "^4.2.8",
+    "fs": "^0.0.1-security",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
-    "isomorphic-fetch": "^3.0.0"
+    "isomorphic-fetch": "^3.0.0",
+    "isomorphic-git": "^1.27.1"
   },
   "devDependencies": {
     "@types/commander": "^2.12.0",
