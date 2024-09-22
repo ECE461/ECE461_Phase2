@@ -61,7 +61,7 @@ export class license {
           }
       });
       let default_branch: string = default_response.data.default_branch;
-
+      console.log(default_branch);
       // gets booleans of LICENSE and README.md files
       const [licenseFile, readMeFile] = await Promise.all([
         this.getFileContent('LICENSE', default_branch),

@@ -42,6 +42,7 @@ var busFactor_1 = require("./busFactor");
 var maintainer_1 = require("./maintainer");
 var rampUp_1 = require("./rampUp");
 var findLicense_1 = require("./findLicense");
+var correctness_1 = require("./correctness");
 var dotenv = require("dotenv");
 dotenv.config();
 var MetricManager = /** @class */ (function () {
@@ -68,7 +69,7 @@ var MetricManager = /** @class */ (function () {
      */
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue, licenseMetric, exists, maintainerMetric, maintainerValue;
+            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue, licenseMetric, exists, maintainerMetric, maintainerValue, correctnessMetric, correctnessValue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -76,21 +77,23 @@ var MetricManager = /** @class */ (function () {
                         return [4 /*yield*/, busFactorMetric.calculateBusFactor()];
                     case 1:
                         busFactorValue = _a.sent();
-                        console.log("The Bus Factor Score is: ".concat(busFactorValue));
                         rampUpMetric = new rampUp_1.rampUp(this.owner, this.repoName);
                         return [4 /*yield*/, rampUpMetric.getRepoStats()];
                     case 2:
                         rampUpValue = _a.sent();
-                        console.log("The RampUp Score is: ".concat(rampUpValue));
                         licenseMetric = new findLicense_1.license(this.owner, this.repoName);
                         return [4 /*yield*/, licenseMetric.getRepoLicense()];
                     case 3:
                         exists = _a.sent();
-                        console.log("The License exists: ".concat(exists));
                         maintainerMetric = new maintainer_1.maintainer(this.owner, this.repoName);
                         return [4 /*yield*/, maintainerMetric.getMaintainerScore()];
                     case 4:
                         maintainerValue = _a.sent();
+                        correctnessMetric = new correctness_1.correctness(this.owner, this.repoName);
+                        return [4 /*yield*/, correctnessMetric.getCorrectnessScore()];
+                    case 5:
+                        correctnessValue = _a.sent();
+                        console.log("The Correctness Score is: ".concat(correctnessValue));
                         //console.log(busFactorValue);
                         return [2 /*return*/, '\nContributors: ' + busFactorValue +
                                 '\n ' + 'Repo Stats: ' + rampUpValue
