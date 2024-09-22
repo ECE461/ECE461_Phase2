@@ -1,36 +1,40 @@
-import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 import 'es6-promise/auto';
 import 'isomorphic-fetch';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
-const GITHUB_API = 'https://api.github.com';
-const NPM_API = 'https://registry.npmjs.org';
+
+let git: any;
+let http: any;
+
+async function initializeGit() {
+  git = await import('isomorphic-git');
+  http = await import('isomorphic-git/http/node');
+}
 
 export class correctness {
   private owner: string;
   private repoName: string;
-  private packageName: string;
-  private packageVersion: string;
   private githubToken: string;
-  private repoContents: any;
-  private packageData: any;
+  private repoDir: string;
+  private repoContents: string[];
 
-  constructor(owner: string, repoName: string, packageName: string, packageVersion: string = 'latest') {
+  constructor(owner: string, repoName: string) {
     this.owner = owner;
     this.repoName = repoName;
-    this.packageName = packageName;
-    this.packageVersion = packageVersion;
     this.githubToken = process.env.GITHUB_TOKEN || '';
+    this.repoDir = path.join('/tmp', `${this.repoName}-${Date.now()}`); // Unique repo dir
+    this.repoContents = [];
   }
 
-  /** 
-   * Calculates the correctness score of the repository or package.
-   * @returns {number} - the correctness score.
-   * */
-  
+  /**
+   * Collects and returns the correctness score of the repository
+   * @returns the correctness score of the repository
+   */
   public async getCorrectnessScore(): Promise<number> {
     await this.fetchRepoContents();
-    await this.fetchPackageData();
 
     const readme = await this.checkReadme() ? 1 : 0;
     const stability = await this.checkStability() ? 1 : 0;
@@ -39,219 +43,166 @@ export class correctness {
     const dependencies = await this.checkDependencies() ? 1 : 0;
 
     // Assign weights
-    const readmeWeight = 0.25;
+    const readmeWeight = 0.2;
     const stabilityWeight = 0.25;
     const testsWeight = 0.3;
     const lintersWeight = 0.1;
-    const dependenciesWeight = 0.1;
+    const dependenciesWeight = 0.15;
 
     // Calculate weighted scores
-    const weightedReadme = readme * readmeWeight;
-    const weightedStability = stability * stabilityWeight;
-    const weightedTests = tests * testsWeight;
-    const weightedLinters = linters * lintersWeight;
-    const weightedDependencies = dependencies * dependenciesWeight;
+    const finalScore = 
+      readme * readmeWeight + 
+      stability * stabilityWeight + 
+      tests * testsWeight + 
+      linters * lintersWeight + 
+      dependencies * dependenciesWeight;
 
-    // Calculate final score
-    const finalScore = weightedReadme + weightedStability + weightedTests
     return finalScore;
-}
-  
-  /** 
-   * Fetches the contents of the github repository.
-   * */
-  async fetchRepoContents() {
-    const response = await fetch(`${GITHUB_API}/repos/${this.owner}/${this.repoName}/contents`, {
-      headers: {
-        'Authorization': `token ${this.githubToken}`
-      }
-    });
-    this.repoContents = await response.json();
   }
 
   /** 
-   * Fetches the contents of the npm package.
-   * */
-  async fetchPackageData() {
-    const response = await fetch(`${NPM_API}/${this.packageName}/${this.packageVersion}`);
-    this.packageData = await response.json();
-  }
+   * Fetches the contents of the repository
+   */
+  private async fetchRepoContents(): Promise<void> {
+    try {
+      const dir = this.repoDir;
+      const url = `https://github.com/${this.owner}/${this.repoName}`;
 
-  /** 
-   * Checks if the repository or package has a README file.
-   * @returns {boolean} - true if README exists, false otherwise.
-   * */
-  async checkReadme(): Promise<number> {
-    if (this.owner && this.repoName) {
-      if (!this.repoContents) {
-        await this.fetchRepoContents();
-      }
-      return this.repoContents.some((file: any) => file.name.toLowerCase() === 'readme.md');
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.readme) {
-        return 1;
-      } else {
-        console.warn('No README found in package data');
-        return 0;
-      }
-    }
-    return 0;
-  }
-
-  /** 
-   * Checks if the repository or package has more than one release.
-   * @returns {boolean} - true if there are more than one release, false otherwise.
-   * */
-  async checkStability(): Promise<boolean> {
-    if (this.owner && this.repoName) {
-      const releasesUrl = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/releases`;
-      try {
-        const response = await fetch(releasesUrl, {
-          headers: {
-            'Authorization': `token ${this.githubToken}`
-          }
+      console.log('Checking if repository exists locally...');
+      if (!fs.existsSync(dir)) {
+        console.log('Cloning the repository...');
+        await git.clone({
+          fs,
+          http,
+          dir,
+          url,
+          depth: 1,
         });
-        const data = await response.json();
-      return data.length > 1;
+        console.log('Repository cloned successfully!');
+      } else {
+        console.log('Repository already exists locally.');
+      }
+
+      console.log('Listing files in the repository...');
+      this.repoContents = await git.listFiles({ fs, dir });
+      console.log('Files listed successfully:', this.repoContents);
+    } catch (error) {
+      console.error('Error fetching repository contents:', error);
+    }
+  }
+
+  /**
+   * 
+   * @returns true if README file exists in the repository, false otherwise
+   */
+  async checkReadme(): Promise<boolean> {
+    if (!this.repoContents.length) {
+      await this.fetchRepoContents();
+    }
+    console.log('Checking for README...');
+    return this.repoContents.some(file => file.toLowerCase() === 'readme.md');
+  }
+
+  /**
+   * 
+   * @returns true if the repository has more than one version or release, false otherwise
+   */
+  async checkStability(): Promise<boolean> {
+    const releasesUrl = `https://api.github.com/repos/${this.owner}/${this.repoName}/releases`;
+    try {
+      const response = await fetch(releasesUrl, {
+        headers: {
+          Authorization: `token ${this.githubToken}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+      const releases = await response.json();
+      return releases.length > 1;
     } catch (error) {
       console.error('Error fetching releases:', error);
       return false;
     }
-  } else if (this.packageName) {
-    await this.fetchPackageData();
-    if (this.packageData && this.packageData.versions) {
-      return Object.keys(this.packageData.versions).length > 1;
-    }
-    return false;
   }
-  return false;
-}
-
-  /** 
-   * Checks if the repository or package has test files.
-   * @returns {boolean} - true if test files exist, false otherwise.
-   * */
+  
+  /**
+   * 
+   * @returns true if the repository has test files, false otherwise
+   */
   async checkTests(): Promise<boolean> {
-    if (this.owner && this.repoName) {
-      if (!this.repoContents) {
-        await this.fetchRepoContents();
-      }
-      const testPatterns = [/test/i, /spec/i, /^__tests__$/i];
-      return this.repoContents.some((file: any) => testPatterns.some(pattern => pattern.test(file.name)));
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
-        const testPatterns = [/test/i, /spec/i, /^__tests__$/i];
-        return Object.keys(this.packageData.versions[this.packageVersion].dist).some((file: string) => testPatterns.some(pattern => pattern.test(file)));
-      }
-      return false;
+    if (!this.repoContents.length) {
+      await this.fetchRepoContents();
     }
-    return false;
+    const testPatterns = [/test/i, /spec/i, /^__tests__$/i];
+    return this.repoContents.some(file => testPatterns.some(pattern => pattern.test(file)));
   }
 
-  /** 
-   * Checks if the repository or package has linter files.
-   * @returns {boolean} - true if linter files exist, false otherwise.
-   * */
-  async checkLinters(): Promise<boolean> {
-    if (this.owner && this.repoName) {
-      if (!this.repoContents) {
-        await this.fetchRepoContents();
-      }
-      const linterFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
-      return this.repoContents.some((file: any) => linterFiles.includes(file.name.toLowerCase()));
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
-        const linterFiles = ['.eslintrc', '.eslintrc.js', '.eslintrc.json', '.eslintrc.yaml', '.eslintrc.yml', 'tslint.json'];
-        return Object.keys(this.packageData.versions[this.packageVersion].dist).some((file: string) => linterFiles.includes(file));
-      }
-      return false;
+  /**
+   * 
+   * @returns true if the repository has linter configuration files, false otherwise
+   */
+  private async checkLinters(): Promise<boolean> {
+    if (!this.repoContents.length) {
+      await this.fetchRepoContents();
     }
-    return false;
+    const linterFiles = [
+      '.eslintrc', '.eslintrc.json', '.eslintrc.js', 
+      '.eslintignore', '.stylelintrc', 
+      '.stylelintrc.json', '.stylelintrc.js', 
+      '.stylelintignore'
+    ];
+    return this.repoContents.some(file => linterFiles.includes(file.toLowerCase()));
   }
 
-  /** 
-   * Checks if the repository or package has dependencies defined.
-   * @returns {boolean} - true if dependencies exist, false otherwise.
-   * */
+  /**
+   * 
+   * @returns true if the repository has dependencies defined in package.json, false otherwise
+   */
   async checkDependencies(): Promise<boolean> {
-    if (this.owner && this.repoName) {
-      if (!this.repoContents) {
-        await this.fetchRepoContents();
-      }
-      const packageJsonFile = this.repoContents.find((file: any) => file.name.toLowerCase() === 'package.json');
-      if (!packageJsonFile) {
-        return false;
-      }
-      try {
-        const response = await fetch(packageJsonFile.download_url, {
-          headers: {
-            'Authorization': `token ${this.githubToken}`
-          }
-        });
-        const packageJson = await response.json();
-        return Object.keys(packageJson.dependencies || {}).length > 0;
-      } catch (error) {
-        console.error('Error fetching package.json from GitHub:', error);
-        return false;
-      }
-    } else if (this.packageName) {
-      await this.fetchPackageData();
-      if (this.packageData && this.packageData.versions && this.packageData.versions[this.packageVersion]) {
-        const packageJson = this.packageData.versions[this.packageVersion];
-        return Object.keys(packageJson.dependencies || {}).length > 0;
-      }
+    if (!this.repoContents.length) {
+      await this.fetchRepoContents();
+    }
+    const packageJsonFile = this.repoContents.find(file => file.toLowerCase() === 'package.json');
+    if (!packageJsonFile) {
+      console.error('package.json not found');
       return false;
     }
-    return false;
+    try {
+      const packageJsonPath = path.join(this.repoDir, packageJsonFile);
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+      return Object.keys(packageJson.dependencies || {}).length > 0;
+    } catch (error) {
+      console.error('Error reading package.json:', error);
+      return false;
+    }
   }
 
-  /** 
-   * Runs all the checks and logs the results.
-   * */
+  /**
+   * Runs all the checks and logs the results
+   */
   async runChecks(): Promise<void> {
+    await this.fetchRepoContents();
     console.log('README exists:', await this.checkReadme());
     console.log('Stability (version exists):', await this.checkStability());
     console.log('Tests defined:', await this.checkTests());
     console.log('Linters defined:', await this.checkLinters());
     console.log('Dependencies defined:', await this.checkDependencies());
+
+    // Cleanup: Remove the repository directory
+    try {
+      fs.rmdirSync(this.repoDir, { recursive: true });
+      console.log('Repository directory removed successfully.');
+    } catch (error) {
+      console.error('Error removing repository directory:', error);
+    }
   }
 }
 
-  /** 
-   * Parses the URL to extract owner, repoName, packageName and packageVersion.
-   * */
-  function parseUrl(url: string): { owner?: string, repoName?: string, packageName?: string, packageVersion?: string } {
-  const githubRegex = /github\.com\/([^\/]+)\/([^\/]+)/;
-  const npmRegex = /npmjs\.com\/package\/([^@]+)(?:@([^\/]+))?/;
-
-  const githubMatch = url.match(githubRegex);
-  if (githubMatch) {
-    return { owner: githubMatch[1], repoName: githubMatch[2] };
-  }
-
-  const npmMatch = url.match(npmRegex);
-  if (npmMatch) {
-    return { packageName: npmMatch[1], packageVersion: npmMatch[2] || 'latest' };
-  }
-
-  throw new Error('Invalid URL format');
-}
-
-/** 
-   * function to run the correctness checks.
-   * */
-const url = ''; // add url here
-try {
-  const parsedData = parseUrl(url);
-  const correctnessChecker = new correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
-  correctnessChecker.getCorrectnessScore().then(score => {
-    console.log('Correctness Score:', score);
-  }).catch(error => {
-    console.error('Error running correctness checks:', error);
-  });
-} catch (error) {
-  console.error('Error parsing URL:', error);
-}
+// Initialize and run the checks
+initializeGit().then(() => {
+  const owner = ''; // Replace with actual owner name
+  const repoName = ''; // Replace with actual repository name
+  const checker = new correctness(owner, repoName);
+  checker.getCorrectnessScore().then(score => console.log(`Correctness Score: ${score}`));
+});
