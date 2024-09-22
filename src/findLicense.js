@@ -106,6 +106,7 @@ var license = /** @class */ (function () {
                     case 1:
                         default_response = _b.sent();
                         default_branch = default_response.data.default_branch;
+                        console.log(default_branch);
                         return [4 /*yield*/, Promise.all([
                                 this.getFileContent('LICENSE', default_branch),
                                 this.getFileContent('README.md', default_branch)
