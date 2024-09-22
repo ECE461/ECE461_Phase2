@@ -13,7 +13,7 @@ export class busFactor {
         const twoYearsAgo = new Date();
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
 
-        const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/commits?since=${twoYearsAgo.toISOString()}&sha=main`;
+        const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/commits?since=${twoYearsAgo.toISOString()}`;
         //console.log(url);
         try {
             const response = await axios.get(url,
@@ -34,7 +34,7 @@ export class busFactor {
             return score;
 
         } catch (error) {
-            console.error('Error fetching commits:', error);
+            console.error('BusFactor -> Error fetching commits:', error);
             process.exit(1);
         }
     }

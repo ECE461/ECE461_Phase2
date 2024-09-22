@@ -69,11 +69,9 @@ var maintainer = /** @class */ (function () {
                         todayDate = new Date();
                         dateDiff = Math.abs(todayDate.getTime() - lastCommitDate.getTime());
                         daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
-                        console.log('Days Diff: ', daysDiff);
                         return [4 /*yield*/, this.getOpenIssueRatioCount()];
                     case 2:
                         openIssueRatio = _a.sent();
-                        console.log("Open Issue Ratio: ", openIssueRatio);
                         score = 0;
                         if (daysDiff < 73 && openIssueRatio < 0.02) {
                             score = 1;
@@ -118,14 +116,13 @@ var maintainer = /** @class */ (function () {
                     case 2:
                         response = _a.sent();
                         openIssues = response.data.open_issues_count;
-                        console.log('Open Issue Count: ', openIssues);
                         return [4 /*yield*/, axios_1.default.get(closedUrl)];
                     case 3:
                         closedResponse = _a.sent();
                         closedIssues = 0;
                         if (closedResponse.data[0] != undefined) {
                             closedIssues = closedResponse.data[0].number; // this number also includes pull requests
-                            console.log('Closed Issue Count: ', closedIssues);
+                            //console.log('Closed Issue Count: ', closedIssues);
                         }
                         // console.log('Open Issue Count: ', openIssues);
                         // console.log('Closed Issue Count: ', closedIssues);
@@ -139,7 +136,7 @@ var maintainer = /** @class */ (function () {
                         return [2 /*return*/, ratio];
                     case 4:
                         error_1 = _a.sent();
-                        console.log('Error when fetching open issue ratio count: ', error_1);
+                        console.error('Error when fetching open issue ratio count: ', error_1);
                         throw new Error('Error when fetching open issue ratio count');
                     case 5: return [2 /*return*/];
                 }
@@ -169,7 +166,7 @@ var maintainer = /** @class */ (function () {
                         return [2 /*return*/, lastCommit.commit.author.date];
                     case 3:
                         error_2 = _a.sent();
-                        console.log('Error when fetching last commit data: ', error_2);
+                        console.error('Error when fetching last commit data: ', error_2);
                         throw new Error('Error when fetching last commit data');
                     case 4: return [2 /*return*/];
                 }

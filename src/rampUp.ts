@@ -25,12 +25,12 @@ export class rampUp {
             const { size, stargazers_count, forks_count } = response.data;
 
             const fileCount = await this.getFileCount();
-            const lineCount = await this.getLineCount();
+            //const lineCount = await this.getLineCount();
             const dependenciesCount = await this.getDependenciesCount();
 
             console.log('Repository Stats:', {
                 fileCount,
-                lineCount,
+                //lineCount,
                 dependenciesCount,
                 size,
                 //stargazers_count,
@@ -39,7 +39,7 @@ export class rampUp {
 
             const score = this.calculateScore({
                 fileCount,
-                lineCount,
+                //lineCount,
                 dependenciesCount,
                 size
                 //stargazers_count,
@@ -49,7 +49,7 @@ export class rampUp {
             return parseFloat(score.toFixed(3));
 
         } catch (error) {
-            console.error('Error fetching repository stats:', error);
+            console.error('RAMPUP -> Error fetching repository stats:', error);
         }
     }
 
@@ -63,9 +63,9 @@ export class rampUp {
         return response.data.length;
     }
 
-    private async getLineCount(): Promise<number> {
+    private async getLineCount(): Promise<number> { // SCRAPED
         // Implement logic to count lines of code in the repository
-        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/main?recursive=1`, {
+        const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/master?recursive=1`, {
             headers: {
                 Authorization: `token ${process.env.GITHUB_TOKEN}`
             }
@@ -100,14 +100,14 @@ export class rampUp {
 
             return Object.keys(dependencies).length;
         } catch (error) {
-            console.error('Error fetching dependencies count:', error);
+            console.error('getDependenciesCount -> Error fetching dependencies count:', error);
             return undefined; // Return undefined in case of an error
         }
     }
 
     private calculateScore(stats: {
         fileCount: number;
-        lineCount: number;
+        //lineCount: number;
         dependenciesCount: number | undefined;
         size: number;
         //stargazers_count: number;
@@ -115,7 +115,7 @@ export class rampUp {
     }): number {
         const {
             fileCount,
-            lineCount,
+            //lineCount,
             dependenciesCount,
             size
             //stargazers_count,
@@ -123,14 +123,15 @@ export class rampUp {
         } = stats;
 
         const fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
-        const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
+        //const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
         const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
         const sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
         //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
         //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
 
         //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
-        const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
+        //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
+        const totalScore = (fileCountScore + dependenciesCountScore + sizeScore) / 3;
 
         return totalScore;
     }

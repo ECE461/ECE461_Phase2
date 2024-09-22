@@ -5,8 +5,8 @@ module.exports = {
     collectCoverage: true,                      // collect coverage
     moduleDirectories: ['node_modules', 'src'],        // import the modules
     rootDir: './',                              // specify root directories
-    collectCoverageFrom: ['src/*.ts'],       // where actual program files are
-    coverageReporters: ['text'],
+    collectCoverageFrom: ['src/*.{js,jsx,ts,tsx}'],       // where actual program files are
+    coverageReporters: ['text'],          // report coverage in text format
     coverageThreshold: {
         global: {
             branches: 80,

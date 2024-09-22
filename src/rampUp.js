@@ -47,11 +47,11 @@ var rampUp = /** @class */ (function () {
     }
     rampUp.prototype.getRepoStats = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, _a, size, stargazers_count, forks_count, fileCount, lineCount, dependenciesCount, score, error_1;
+            var response, _a, size, stargazers_count, forks_count, fileCount, dependenciesCount, score, error_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 5, , 6]);
+                        _b.trys.push([0, 4, , 5]);
                         return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName), {
                                 headers: {
                                     Authorization: "token ".concat(process.env.GITHUB_TOKEN)
@@ -63,15 +63,12 @@ var rampUp = /** @class */ (function () {
                         return [4 /*yield*/, this.getFileCount()];
                     case 2:
                         fileCount = _b.sent();
-                        return [4 /*yield*/, this.getLineCount()];
-                    case 3:
-                        lineCount = _b.sent();
                         return [4 /*yield*/, this.getDependenciesCount()];
-                    case 4:
+                    case 3:
                         dependenciesCount = _b.sent();
                         console.log('Repository Stats:', {
                             fileCount: fileCount,
-                            lineCount: lineCount,
+                            //lineCount,
                             dependenciesCount: dependenciesCount,
                             size: size,
                             //stargazers_count,
@@ -79,18 +76,18 @@ var rampUp = /** @class */ (function () {
                         });
                         score = this.calculateScore({
                             fileCount: fileCount,
-                            lineCount: lineCount,
+                            //lineCount,
                             dependenciesCount: dependenciesCount,
                             size: size
                             //stargazers_count,
                             //forks_count
                         });
                         return [2 /*return*/, parseFloat(score.toFixed(3))];
-                    case 5:
+                    case 4:
                         error_1 = _b.sent();
-                        console.error('Error fetching repository stats:', error_1);
-                        return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/];
+                        console.error('RAMPUP -> Error fetching repository stats:', error_1);
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -117,7 +114,7 @@ var rampUp = /** @class */ (function () {
             var response, tree, lineCount, _i, tree_1, file, fileResponse;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/git/trees/main?recursive=1"), {
+                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/git/trees/master?recursive=1"), {
                             headers: {
                                 Authorization: "token ".concat(process.env.GITHUB_TOKEN)
                             }
@@ -168,7 +165,7 @@ var rampUp = /** @class */ (function () {
                         return [2 /*return*/, Object.keys(dependencies).length];
                     case 2:
                         error_2 = _a.sent();
-                        console.error('Error fetching dependencies count:', error_2);
+                        console.error('getDependenciesCount -> Error fetching dependencies count:', error_2);
                         return [2 /*return*/, undefined]; // Return undefined in case of an error
                     case 3: return [2 /*return*/];
                 }
@@ -176,18 +173,21 @@ var rampUp = /** @class */ (function () {
         });
     };
     rampUp.prototype.calculateScore = function (stats) {
-        var fileCount = stats.fileCount, lineCount = stats.lineCount, dependenciesCount = stats.dependenciesCount, size = stats.size
+        var fileCount = stats.fileCount, 
+        //lineCount,
+        dependenciesCount = stats.dependenciesCount, size = stats.size
         //stargazers_count,
         //forks_count
         ;
         var fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
-        var lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
+        //const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
         var dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
         var sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
         //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
         //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);
         //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore + stargazersCountScore + forksCountScore) / 6;
-        var totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
+        //const totalScore = (fileCountScore + lineCountScore + dependenciesCountScore + sizeScore) / 4;
+        var totalScore = (fileCountScore + dependenciesCountScore + sizeScore) / 3;
         return totalScore;
     };
     rampUp.MAX_FILE_COUNT = 1000;

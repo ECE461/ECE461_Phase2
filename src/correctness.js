@@ -357,3 +357,4 @@ initializeGit().then(function () {
     var checker = new correctness(owner, repoName);
     checker.getCorrectnessScore().then(function (score) { return console.log("Correctness Score: ".concat(score)); });
 });
+

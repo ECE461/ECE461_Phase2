@@ -33,11 +33,11 @@ export class maintainer {
         // calculate difference in days between the last commit and today
         const dateDiff = Math.abs(todayDate.getTime() - lastCommitDate.getTime());
         const daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
-        console.log('Days Diff: ', daysDiff);
+        //console.log('Days Diff: ', daysDiff);
 
         // find open to total issue ratio
         const openIssueRatio = await this.getOpenIssueRatioCount();
-        console.log("Open Issue Ratio: ", openIssueRatio);
+        //console.log("Open Issue Ratio: ", openIssueRatio);
 
         // calculate score (0-1) based on how long ago last commit was & open to total issue ratio
         let score = 0;
@@ -74,13 +74,13 @@ export class maintainer {
         try {
             const response = await axios.get(url);
             const openIssues = response.data.open_issues_count; // this number includes open pull requests
-            console.log('Open Issue Count: ', openIssues);
+            //console.log('Open Issue Count: ', openIssues);
             
             const closedResponse = await axios.get(closedUrl);
             var closedIssues = 0;
             if(closedResponse.data[0] != undefined) {
                 closedIssues = closedResponse.data[0].number; // this number also includes pull requests
-                console.log('Closed Issue Count: ', closedIssues);
+                //console.log('Closed Issue Count: ', closedIssues);
             }
 
             // console.log('Open Issue Count: ', openIssues);
@@ -94,7 +94,7 @@ export class maintainer {
             const ratio = openIssues / (openIssues + closedIssues);
             return ratio;
         } catch (error) {
-            console.log('Error when fetching open issue ratio count: ', error);
+            console.error('Error when fetching open issue ratio count: ', error);
             throw new Error('Error when fetching open issue ratio count');
         }
     }
@@ -112,7 +112,7 @@ export class maintainer {
             // console.log('Last Commit Data: ', lastCommit.commit.author.date);
             return lastCommit.commit.author.date;
         } catch (error) {
-            console.log('Error when fetching last commit data: ', error);
+            console.error('Error when fetching last commit data: ', error);
             throw new Error('Error when fetching last commit data');
         }
     }
