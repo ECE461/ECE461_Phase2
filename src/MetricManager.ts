@@ -3,7 +3,7 @@ import { busFactor } from "./busFactor";
 import { maintainer } from "./maintainer";
 import { rampUp } from "./rampUp";
 import { license } from "./findLicense";
-import { Correctness } from "./correctness";
+import { correctness } from "./correctness";
 import * as dotenv from 'dotenv';
 dotenv.config();
 
