@@ -88,7 +88,7 @@ var rampUp = /** @class */ (function () {
                         return [2 /*return*/, parseFloat(score.toFixed(3))];
                     case 5:
                         error_1 = _b.sent();
-                        console.error('Error fetching repository stats:', error_1);
+                        console.error('RAMPUP -> Error fetching repository stats:', error_1);
                         return [3 /*break*/, 6];
                     case 6: return [2 /*return*/];
                 }
@@ -168,7 +168,7 @@ var rampUp = /** @class */ (function () {
                         return [2 /*return*/, Object.keys(dependencies).length];
                     case 2:
                         error_2 = _a.sent();
-                        console.error('Error fetching dependencies count:', error_2);
+                        console.error('getDependenciesCount -> Error fetching dependencies count:', error_2);
                         return [2 /*return*/, undefined]; // Return undefined in case of an error
                     case 3: return [2 /*return*/];
                 }

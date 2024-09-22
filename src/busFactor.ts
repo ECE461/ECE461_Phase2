@@ -34,7 +34,7 @@ export class busFactor {
             return score;
 
         } catch (error) {
-            console.error('Error fetching commits:', error);
+            console.error('BusFactor -> Error fetching commits:', error);
             process.exit(1);
         }
     }

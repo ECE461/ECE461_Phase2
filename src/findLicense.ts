@@ -27,7 +27,7 @@ export class license {
   private async getFileContent(path: string) : Promise<boolean | null> {
     try {
       const url = `${GITHUB_API}/${this.owner}/${this.repoName}/main/${path}`;
-      const license_list = ['LGPLv2.1', 'MIT license', 'Apache License 2.0', 'BSD 3-Clause License']
+      const license_list = ['lgplv2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license']
       const response = await axios.get(url, 
         {
           headers: {
@@ -35,11 +35,13 @@ export class license {
           }
         }
       );
-      return response.data.includes(license_list);  
+      let hasLicense = license_list.some(license => response.data.toLowerCase().includes(license));
+      console.log(hasLicense); 
+      return hasLicense;
 
     } catch (error) {
-      //console.error(`Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
-      //console.log(path);
+      console.error(`findLicense -> Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+      console.log(path);
       return null;
     }
   }
@@ -67,7 +69,7 @@ export class license {
       return 0;
 
     } catch (error) {
-      console.error(`Error when fetching license in ${this.owner}/${this.repoName}: ${error}`);
+      console.error(`getRepoLicense -> Error when fetching license in ${this.owner}/${this.repoName}: ${error}`);
       return 0;
     }
   }

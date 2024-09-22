@@ -49,7 +49,7 @@ export class rampUp {
             return parseFloat(score.toFixed(3));
 
         } catch (error) {
-            console.error('Error fetching repository stats:', error);
+            console.error('RAMPUP -> Error fetching repository stats:', error);
         }
     }
 
@@ -100,7 +100,7 @@ export class rampUp {
 
             return Object.keys(dependencies).length;
         } catch (error) {
-            console.error('Error fetching dependencies count:', error);
+            console.error('getDependenciesCount -> Error fetching dependencies count:', error);
             return undefined; // Return undefined in case of an error
         }
     }

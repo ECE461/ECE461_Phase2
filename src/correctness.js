@@ -36,15 +36,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Correctness = void 0;
+exports.correctness = void 0;
 var dotenv = require("dotenv");
 require("es6-promise/auto");
 require("isomorphic-fetch");
 dotenv.config();
 var GITHUB_API = 'https://api.github.com';
 var NPM_API = 'https://registry.npmjs.org';
-var Correctness = /** @class */ (function () {
-    function Correctness(owner, repoName, packageName, packageVersion) {
+var correctness = /** @class */ (function () {
+    function correctness(owner, repoName, packageName, packageVersion) {
         if (packageVersion === void 0) { packageVersion = 'latest'; }
         this.owner = owner;
         this.repoName = repoName;
@@ -56,7 +56,7 @@ var Correctness = /** @class */ (function () {
      * Calculates the correctness score of the repository or package.
      * @returns {number} - the correctness score.
      * */
-    Correctness.prototype.getCorrectnessScore = function () {
+    correctness.prototype.getCorrectnessScore = function () {
         return __awaiter(this, void 0, void 0, function () {
             var readme, stability, tests, linters, dependencies, readmeWeight, stabilityWeight, testsWeight, lintersWeight, dependenciesWeight, weightedReadme, weightedStability, weightedTests, weightedLinters, weightedDependencies, finalScore;
             return __generator(this, function (_a) {
@@ -101,7 +101,7 @@ var Correctness = /** @class */ (function () {
     /**
      * Fetches the contents of the github repository.
      * */
-    Correctness.prototype.fetchRepoContents = function () {
+    correctness.prototype.fetchRepoContents = function () {
         return __awaiter(this, void 0, void 0, function () {
             var response, _a;
             return __generator(this, function (_b) {
@@ -125,7 +125,7 @@ var Correctness = /** @class */ (function () {
     /**
      * Fetches the contents of the npm package.
      * */
-    Correctness.prototype.fetchPackageData = function () {
+    correctness.prototype.fetchPackageData = function () {
         return __awaiter(this, void 0, void 0, function () {
             var response, _a;
             return __generator(this, function (_b) {
@@ -146,7 +146,7 @@ var Correctness = /** @class */ (function () {
      * Checks if the repository or package has a README file.
      * @returns {boolean} - true if README exists, false otherwise.
      * */
-    Correctness.prototype.checkReadme = function () {
+    correctness.prototype.checkReadme = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -180,7 +180,7 @@ var Correctness = /** @class */ (function () {
      * Checks if the repository or package has more than one release.
      * @returns {boolean} - true if there are more than one release, false otherwise.
      * */
-    Correctness.prototype.checkStability = function () {
+    correctness.prototype.checkStability = function () {
         return __awaiter(this, void 0, void 0, function () {
             var releasesUrl, response, data, error_1;
             return __generator(this, function (_a) {
@@ -225,7 +225,7 @@ var Correctness = /** @class */ (function () {
      * Checks if the repository or package has test files.
      * @returns {boolean} - true if test files exist, false otherwise.
      * */
-    Correctness.prototype.checkTests = function () {
+    correctness.prototype.checkTests = function () {
         return __awaiter(this, void 0, void 0, function () {
             var testPatterns_1, testPatterns_2;
             return __generator(this, function (_a) {
@@ -259,7 +259,7 @@ var Correctness = /** @class */ (function () {
      * Checks if the repository or package has linter files.
      * @returns {boolean} - true if linter files exist, false otherwise.
      * */
-    Correctness.prototype.checkLinters = function () {
+    correctness.prototype.checkLinters = function () {
         return __awaiter(this, void 0, void 0, function () {
             var linterFiles_1, linterFiles_2;
             return __generator(this, function (_a) {
@@ -293,7 +293,7 @@ var Correctness = /** @class */ (function () {
      * Checks if the repository or package has dependencies defined.
      * @returns {boolean} - true if dependencies exist, false otherwise.
      * */
-    Correctness.prototype.checkDependencies = function () {
+    correctness.prototype.checkDependencies = function () {
         return __awaiter(this, void 0, void 0, function () {
             var packageJsonFile, response, packageJson, error_2, packageJson;
             return __generator(this, function (_a) {
@@ -347,7 +347,7 @@ var Correctness = /** @class */ (function () {
     /**
      * Runs all the checks and logs the results.
      * */
-    Correctness.prototype.runChecks = function () {
+    correctness.prototype.runChecks = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             return __generator(this, function (_r) {
@@ -383,9 +383,9 @@ var Correctness = /** @class */ (function () {
             });
         });
     };
-    return Correctness;
+    return correctness;
 }());
-exports.Correctness = Correctness;
+exports.correctness = correctness;
 /**
  * Parses the URL to extract owner, repoName, packageName and packageVersion.
  * */
@@ -408,7 +408,7 @@ function parseUrl(url) {
 var url = ''; // add url here
 try {
     var parsedData = parseUrl(url);
-    var correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
+    var correctnessChecker = new correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
     correctnessChecker.getCorrectnessScore().then(function (score) {
         console.log('Correctness Score:', score);
     }).catch(function (error) {
