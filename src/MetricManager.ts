@@ -49,6 +49,10 @@ export class MetricManager {
         let exists = await licenseMetric.getRepoLicense();
         console.log(`The License exists: ${exists}`);
 
+        let correctnessMetric = new correctness(this.owner, this.repoName);
+        let correctnessValue = await correctnessMetric.getCorrectnessScore();
+        console.log(`The Correctness Score is: ${correctnessValue}`);
+
         //console.log(busFactorValue);
         return 'Contributors: ' + busFactorValue + 
         '\n\n ' + 'Repo Stats: ' + rampUpValue;
