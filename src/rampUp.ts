@@ -4,7 +4,7 @@ export class rampUp {
     private repoOwner: string;
     private repoName: string;
     private static readonly MAX_FILE_COUNT = 1000;
-    private static readonly MAX_LINE_COUNT = 100000;
+    //private static readonly MAX_LINE_COUNT = 100000;
     private static readonly MAX_DEPENDENCIES_COUNT = 100;
     private static readonly MAX_SIZE = 10000000; // in KB
     //private static readonly MAX_STARGAZERS_COUNT = 10000;
@@ -62,7 +62,7 @@ export class rampUp {
         });
         return response.data.length;
     }
-
+/*
     private async getLineCount(): Promise<number> { // SCRAPED
         // Implement logic to count lines of code in the repository
         const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/master?recursive=1`, {
@@ -86,7 +86,7 @@ export class rampUp {
 
         return lineCount;
     }
-
+*/
     private async getDependenciesCount(): Promise<number | undefined> {
         // Implement logic to count dependencies in the repository
         try {

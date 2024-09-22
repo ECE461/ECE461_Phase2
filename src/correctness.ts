@@ -34,6 +34,7 @@ export class correctness {
    * @returns the correctness score of the repository
    */
   public async getCorrectnessScore(): Promise<number> {
+    await initializeGit();
     await this.fetchRepoContents();
 
     const readme = await this.checkReadme() ? 1 : 0;
@@ -56,7 +57,13 @@ export class correctness {
       tests * testsWeight + 
       linters * lintersWeight + 
       dependencies * dependenciesWeight;
-
+    
+    try {
+      fs.rmSync(this.repoDir, { recursive: true });
+      //console.log('Repository directory removed successfully.');
+    } catch (error) {
+      console.error('CORRECTNESS -> Error removing repository directory:', error);
+    }
     return finalScore;
   }
 
@@ -68,26 +75,27 @@ export class correctness {
       const dir = this.repoDir;
       const url = `https://github.com/${this.owner}/${this.repoName}`;
 
-      console.log('Checking if repository exists locally...');
+      //console.log('Checking if repository exists locally...');
       if (!fs.existsSync(dir)) {
-        console.log('Cloning the repository...');
+        //console.log('Cloning the repository...');
         await git.clone({
           fs,
           http,
           dir,
           url,
-          depth: 1,
+          singleBranch: true,
+          depth: 1
         });
-        console.log('Repository cloned successfully!');
+        //console.log('Repository cloned successfully!');
       } else {
-        console.log('Repository already exists locally.');
+        //console.log('Repository already exists locally.');
       }
 
-      console.log('Listing files in the repository...');
+      //console.log('Listing files in the repository...');
       this.repoContents = await git.listFiles({ fs, dir });
-      console.log('Files listed successfully:', this.repoContents);
+      //console.log('Files listed successfully:', this.repoContents);
     } catch (error) {
-      console.error('Error fetching repository contents:', error);
+      console.error('CORRECTNESS -> Error fetching repository contents:', error);
     }
   }
 
@@ -99,7 +107,7 @@ export class correctness {
     if (!this.repoContents.length) {
       await this.fetchRepoContents();
     }
-    console.log('Checking for README...');
+    //console.log('Checking for README...');
     return this.repoContents.some(file => file.toLowerCase() === 'readme.md');
   }
 
@@ -121,7 +129,7 @@ export class correctness {
       const releases = await response.json();
       return releases.length > 1;
     } catch (error) {
-      console.error('Error fetching releases:', error);
+      console.error('CORRECTNESS -> Error fetching releases:', error);
       return false;
     }
   }
@@ -165,7 +173,7 @@ export class correctness {
     }
     const packageJsonFile = this.repoContents.find(file => file.toLowerCase() === 'package.json');
     if (!packageJsonFile) {
-      console.error('package.json not found');
+      //console.error('package.json not found');
       return false;
     }
     try {
@@ -173,7 +181,7 @@ export class correctness {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       return Object.keys(packageJson.dependencies || {}).length > 0;
     } catch (error) {
-      console.error('Error reading package.json:', error);
+      console.error('CORRECTNESS -> Error reading package.json:', error);
       return false;
     }
   }
@@ -199,10 +207,10 @@ export class correctness {
   }
 }
 
-// Initialize and run the checks
-initializeGit().then(() => {
-  const owner = ''; // Replace with actual owner name
-  const repoName = ''; // Replace with actual repository name
-  const checker = new correctness(owner, repoName);
-  checker.getCorrectnessScore().then(score => console.log(`Correctness Score: ${score}`));
-});
+// // Initialize and run the checks
+// initializeGit().then(() => {
+//   const owner = ''; // Replace with actual owner name
+//   const repoName = ''; // Replace with actual repository name
+//   const checker = new correctness(owner, repoName);
+//   checker.getCorrectnessScore().then(score => console.log(`Correctness Score: ${score}`));
+// });
