@@ -246,7 +246,7 @@ export class correctness {
 const url = ''; // add url here
 try {
   const parsedData = parseUrl(url);
-  const correctnessChecker = new Correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
+  const correctnessChecker = new correctness(parsedData.owner || '', parsedData.repoName || '', parsedData.packageName || '', parsedData.packageVersion || 'latest');
   correctnessChecker.getCorrectnessScore().then(score => {
     console.log('Correctness Score:', score);
   }).catch(error => {
