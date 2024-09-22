@@ -72,11 +72,23 @@ export class maintainer {
         const url = `${GITHUB_API}/repos/${this.owner}/${this.repoName}`;
         const closedUrl = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/issues`;
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                }
+            );
             const openIssues = response.data.open_issues_count; // this number includes open pull requests
             //console.log('Open Issue Count: ', openIssues);
             
-            const closedResponse = await axios.get(closedUrl);
+            const closedResponse = await axios.get(closedUrl,
+                {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                }
+            );
             var closedIssues = 0;
             if(closedResponse.data[0] != undefined) {
                 closedIssues = closedResponse.data[0].number; // this number also includes pull requests
@@ -107,7 +119,13 @@ export class maintainer {
     private async getLastCommit(): Promise<string> {
         const url = `${GITHUB_API}/repos/${this.owner}/${this.repoName}/commits`;
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                }
+            );
             const lastCommit = response.data[0];
             // console.log('Last Commit Data: ', lastCommit.commit.author.date);
             return lastCommit.commit.author.date;

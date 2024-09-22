@@ -64,7 +64,7 @@ var license = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         url = "".concat(GITHUB_API, "/").concat(this.owner, "/").concat(this.repoName, "/").concat(default_branch, "/").concat(path);
-                        license_list = ['lgplv2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license'];
+                        license_list = ['lgpl v2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license', 'lesser general public license version 2.1'];
                         return [4 /*yield*/, axios_1.default.get(url, {
                                 headers: {
                                     Authorization: "token ".concat(process.env.GITHUB_TOKEN)
