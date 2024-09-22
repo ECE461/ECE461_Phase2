@@ -26,7 +26,7 @@ export class license {
   private async getFileContent(path: string, default_branch: string) : Promise<boolean | null> {
     try {
       const url = `${GITHUB_API}/${this.owner}/${this.repoName}/${default_branch}/${path}`;
-      const license_list = ['lgplv2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license']
+      const license_list = ['lgpl v2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license', 'lesser general public license version 2.1']
       const response = await axios.get(url, 
         {
           headers: {
