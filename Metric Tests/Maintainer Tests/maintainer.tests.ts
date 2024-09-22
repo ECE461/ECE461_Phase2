@@ -1,4 +1,5 @@
 import { maintainer } from '../../src/maintainer';
+require('dotenv').config();
 
 describe('Maintainer Test 1', () => {
     it('should return a number', async () => {

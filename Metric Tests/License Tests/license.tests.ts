@@ -26,9 +26,9 @@ describe ('License Testing', () => {
         expect(val).toBe(0);
     });
 
-/*     test('', async () => {
+    test('Empty Repository', async () => {
         let find = new license('', '');
         let val = await find.getRepoLicense();
-        expect(val).toBe(1);
-    }); */
+        expect(val).toBe(0);
+    }); 
 });
