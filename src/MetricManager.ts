@@ -50,6 +50,10 @@ export class MetricManager {
         let maintainerMetric = new maintainer(this.owner, this.repoName);
         let maintainerValue = await maintainerMetric.getMaintainerScore();
 
+        let correctnessMetric = new correctness(this.owner, this.repoName);
+        let correctnessValue = await correctnessMetric.getCorrectnessScore();
+        console.log(`The Correctness Score is: ${correctnessValue}`);
+
         //console.log(busFactorValue);
         return '\nContributors: ' + busFactorValue + 
         '\n ' + 'Repo Stats: ' + rampUpValue
