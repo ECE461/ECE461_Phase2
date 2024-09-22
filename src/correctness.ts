@@ -6,7 +6,7 @@ dotenv.config();
 const GITHUB_API = 'https://api.github.com';
 const NPM_API = 'https://registry.npmjs.org';
 
-export class Correctness {
+export class correctness {
   private owner: string;
   private repoName: string;
   private packageName: string;
