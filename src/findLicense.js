@@ -56,18 +56,18 @@ var license = /** @class */ (function () {
      *
      * @returns a boolean if the LGPLv2.1 is in the file, null if there is an error
      */
-    license.prototype.getFileContent = function (path) {
+    license.prototype.getFileContent = function (path, default_branch) {
         return __awaiter(this, void 0, void 0, function () {
             var url, license_list, response_1, hasLicense, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        url = "".concat(GITHUB_API, "/").concat(this.owner, "/").concat(this.repoName, "/main/").concat(path);
+                        url = "".concat(GITHUB_API, "/").concat(this.owner, "/").concat(this.repoName, "/").concat(default_branch, "/").concat(path);
                         license_list = ['lgplv2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license'];
                         return [4 /*yield*/, axios_1.default.get(url, {
                                 headers: {
-                                    'Authorization': "token ".concat(process.env.GITHUB_TOKEN)
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
                                 }
                             })];
                     case 1:
@@ -77,8 +77,8 @@ var license = /** @class */ (function () {
                         return [2 /*return*/, hasLicense];
                     case 2:
                         error_1 = _a.sent();
-                        console.error("findLicense -> Error when fetching file content in ".concat(this.owner, "/").concat(this.repoName, "  ").concat(path, ": ").concat(error_1));
-                        console.log(path);
+                        //console.error(`findLicense -> Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+                        //console.log(path);
                         return [2 /*return*/, null];
                     case 3: return [2 /*return*/];
                 }
@@ -92,16 +92,25 @@ var license = /** @class */ (function () {
      */
     license.prototype.getRepoLicense = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, licenseFile, readMeFile, error_2;
+            var default_url, default_response, default_branch, _a, licenseFile, readMeFile, error_2;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, Promise.all([
-                                this.getFileContent('LICENSE'),
-                                this.getFileContent('README.md')
-                            ])];
+                        _b.trys.push([0, 3, , 4]);
+                        default_url = "https://api.github.com/repos/".concat(this.owner, "/").concat(this.repoName);
+                        return [4 /*yield*/, axios_1.default.get(default_url, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 1:
+                        default_response = _b.sent();
+                        default_branch = default_response.data.default_branch;
+                        return [4 /*yield*/, Promise.all([
+                                this.getFileContent('LICENSE', default_branch),
+                                this.getFileContent('README.md', default_branch)
+                            ])];
+                    case 2:
                         _a = _b.sent(), licenseFile = _a[0], readMeFile = _a[1];
                         // checks if one or the other contains LGPLv2.1
                         if (licenseFile || readMeFile) {
@@ -110,11 +119,11 @@ var license = /** @class */ (function () {
                         }
                         //console.log('License Not Found');
                         return [2 /*return*/, 0];
-                    case 2:
+                    case 3:
                         error_2 = _b.sent();
                         console.error("getRepoLicense -> Error when fetching license in ".concat(this.owner, "/").concat(this.repoName, ": ").concat(error_2));
                         return [2 /*return*/, 0];
-                    case 3: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

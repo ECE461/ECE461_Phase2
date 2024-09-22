@@ -51,7 +51,7 @@ var busFactor = /** @class */ (function () {
                     case 0:
                         twoYearsAgo = new Date();
                         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-                        url = "https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/commits?since=").concat(twoYearsAgo.toISOString(), "&sha=main");
+                        url = "https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/commits?since=").concat(twoYearsAgo.toISOString());
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);

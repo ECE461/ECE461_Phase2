@@ -43,7 +43,6 @@ var rampUp_1 = require("./rampUp");
 var findLicense_1 = require("./findLicense");
 var dotenv = require("dotenv");
 dotenv.config();
-var GITHUB_API = 'https://api.github.com/graphql';
 var MetricManager = /** @class */ (function () {
     /**
      * constructs a metrics manager for a GitHub repository

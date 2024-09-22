@@ -3,7 +3,6 @@ import axios from 'axios';
 const GITHUB_API = 'https://raw.githubusercontent.com';
 // const NPM_API = 'https://registry.npmjs.org';
 
-
 export class license {
   private owner: string;
   private repoName: string;
@@ -24,14 +23,14 @@ export class license {
    * 
    * @returns a boolean if the LGPLv2.1 is in the file, null if there is an error
    */
-  private async getFileContent(path: string) : Promise<boolean | null> {
+  private async getFileContent(path: string, default_branch: string) : Promise<boolean | null> {
     try {
-      const url = `${GITHUB_API}/${this.owner}/${this.repoName}/main/${path}`;
+      const url = `${GITHUB_API}/${this.owner}/${this.repoName}/${default_branch}/${path}`;
       const license_list = ['lgplv2.1', 'mit license', 'apache license 2.0', 'bsd 3-clause license']
       const response = await axios.get(url, 
         {
           headers: {
-            'Authorization': `token ${process.env.GITHUB_TOKEN}`
+            Authorization: `token ${process.env.GITHUB_TOKEN}`
           }
         }
       );
@@ -40,8 +39,8 @@ export class license {
       return hasLicense;
 
     } catch (error) {
-      console.error(`findLicense -> Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
-      console.log(path);
+      //console.error(`findLicense -> Error when fetching file content in ${this.owner}/${this.repoName}  ${path}: ${error}`);
+      //console.log(path);
       return null;
     }
   }
@@ -53,11 +52,20 @@ export class license {
    */
   async getRepoLicense() : Promise<number> {
     try {
-      
+      // get the default branch of the repository
+      const default_url = `https://api.github.com/repos/${this.owner}/${this.repoName}`;
+      const default_response = await axios.get(default_url, 
+      {
+          headers: {
+            Authorization: `token ${process.env.GITHUB_TOKEN}`
+          }
+      });
+      let default_branch: string = default_response.data.default_branch;
+
       // gets booleans of LICENSE and README.md files
       const [licenseFile, readMeFile] = await Promise.all([
-        this.getFileContent('LICENSE'),
-        this.getFileContent('README.md')
+        this.getFileContent('LICENSE', default_branch),
+        this.getFileContent('README.md', default_branch)
       ]);
       
       // checks if one or the other contains LGPLv2.1

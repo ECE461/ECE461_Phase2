@@ -7,7 +7,6 @@ import { correctness } from "./correctness";
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const GITHUB_API = 'https://api.github.com/graphql';
 
 
 export class MetricManager {
@@ -36,6 +35,8 @@ export class MetricManager {
      * @returns the net score of the package
      */
     async getMetrics() : Promise<string> {
+        
+        
         // get the bus factor
         let busFactorMetric = new busFactor(this.owner, this.repoName);
         let busFactorValue = await busFactorMetric.calculateBusFactor();
