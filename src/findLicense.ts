@@ -35,7 +35,7 @@ export class license {
         }
       );
       let hasLicense = license_list.some(license => response.data.toLowerCase().includes(license));
-      console.log(hasLicense); 
+      //console.log(hasLicense); 
       return hasLicense;
 
     } catch (error) {

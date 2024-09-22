@@ -73,7 +73,7 @@ var license = /** @class */ (function () {
                     case 1:
                         response_1 = _a.sent();
                         hasLicense = license_list.some(function (license) { return response_1.data.toLowerCase().includes(license); });
-                        console.log(hasLicense);
+                        //console.log(hasLicense); 
                         return [2 /*return*/, hasLicense];
                     case 2:
                         error_1 = _a.sent();

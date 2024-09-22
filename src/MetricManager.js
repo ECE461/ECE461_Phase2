@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetricManager = void 0;
 // takes info from API and outputs metrics
 var busFactor_1 = require("./busFactor");
+var maintainer_1 = require("./maintainer");
 var rampUp_1 = require("./rampUp");
 var findLicense_1 = require("./findLicense");
 var dotenv = require("dotenv");
@@ -67,7 +68,7 @@ var MetricManager = /** @class */ (function () {
      */
     MetricManager.prototype.getMetrics = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue, licenseMetric, exists;
+            var busFactorMetric, busFactorValue, rampUpMetric, rampUpValue, licenseMetric, exists, maintainerMetric, maintainerValue;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -86,9 +87,15 @@ var MetricManager = /** @class */ (function () {
                     case 3:
                         exists = _a.sent();
                         console.log("The License exists: ".concat(exists));
+                        maintainerMetric = new maintainer_1.maintainer(this.owner, this.repoName);
+                        return [4 /*yield*/, maintainerMetric.getMaintainerScore()];
+                    case 4:
+                        maintainerValue = _a.sent();
                         //console.log(busFactorValue);
-                        return [2 /*return*/, 'Contributors: ' + busFactorValue +
-                                '\n\n ' + 'Repo Stats: ' + rampUpValue];
+                        return [2 /*return*/, '\nContributors: ' + busFactorValue +
+                                '\n ' + 'Repo Stats: ' + rampUpValue
+                                + '\n ' + 'License: ' + exists
+                                + '\n ' + 'Maintainer: ' + maintainerValue];
                 }
             });
         });

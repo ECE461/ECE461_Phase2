@@ -40,20 +40,21 @@ export class MetricManager {
         // get the bus factor
         let busFactorMetric = new busFactor(this.owner, this.repoName);
         let busFactorValue = await busFactorMetric.calculateBusFactor();
-        console.log(`The Bus Factor Score is: ${busFactorValue}`);
 
         let rampUpMetric = new rampUp(this.owner, this.repoName);
         let rampUpValue = await rampUpMetric.getRepoStats();
-        console.log(`The RampUp Score is: ${rampUpValue}`);
 
         let licenseMetric = new license(this.owner, this.repoName)
         let exists = await licenseMetric.getRepoLicense();
-        console.log(`The License exists: ${exists}`);
         
+        let maintainerMetric = new maintainer(this.owner, this.repoName);
+        let maintainerValue = await maintainerMetric.getMaintainerScore();
 
         //console.log(busFactorValue);
-        return 'Contributors: ' + busFactorValue + 
-        '\n\n ' + 'Repo Stats: ' + rampUpValue;
+        return '\nContributors: ' + busFactorValue + 
+        '\n ' + 'Repo Stats: ' + rampUpValue
+        + '\n ' + 'License: ' + exists
+        + '\n ' + 'Maintainer: ' + maintainerValue;
     }
 
     /**
