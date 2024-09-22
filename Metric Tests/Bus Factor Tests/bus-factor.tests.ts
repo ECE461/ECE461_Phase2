@@ -1,5 +1,6 @@
 import { busFactor } from '../../src/busFactor';
 import axios from 'axios';
+require('dotenv').config();
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
