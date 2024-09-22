@@ -3,7 +3,7 @@ import { busFactor } from "./busFactor";
 import { maintainer } from "./maintainer";
 import { rampUp } from "./rampUp";
 import { license } from "./findLicense";
-import { correctness } from "./correctness";
+import { Correctness } from "./correctness";
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -48,6 +48,7 @@ export class MetricManager {
         let licenseMetric = new license(this.owner, this.repoName)
         let exists = await licenseMetric.getRepoLicense();
         console.log(`The License exists: ${exists}`);
+        
 
         //console.log(busFactorValue);
         return 'Contributors: ' + busFactorValue + 
