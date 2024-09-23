@@ -144,7 +144,7 @@ var maintainer = /** @class */ (function () {
                         return [2 /*return*/, ratio];
                     case 4:
                         error_1 = _a.sent();
-                        console.error('Error when fetching open issue ratio count: ', error_1);
+                        console.error('Error when fetching open issue ratio count: ', error_1.message);
                         throw new Error('Error when fetching open issue ratio count');
                     case 5: return [2 /*return*/];
                 }
@@ -178,7 +178,7 @@ var maintainer = /** @class */ (function () {
                         return [2 /*return*/, lastCommit.commit.author.date];
                     case 3:
                         error_2 = _a.sent();
-                        console.error('Error when fetching last commit data: ', error_2);
+                        console.error('Error when fetching last commit data: ', error_2.message);
                         throw new Error('Error when fetching last commit data');
                     case 4: return [2 /*return*/];
                 }

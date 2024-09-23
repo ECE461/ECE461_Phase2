@@ -106,7 +106,7 @@ export class maintainer {
             const ratio = openIssues / (openIssues + closedIssues);
             return ratio;
         } catch (error) {
-            console.error('Error when fetching open issue ratio count: ', error);
+            console.error('Error when fetching open issue ratio count: ', (error as any).message);
             throw new Error('Error when fetching open issue ratio count');
         }
     }
@@ -130,7 +130,7 @@ export class maintainer {
             // console.log('Last Commit Data: ', lastCommit.commit.author.date);
             return lastCommit.commit.author.date;
         } catch (error) {
-            console.error('Error when fetching last commit data: ', error);
+            console.error('Error when fetching last commit data: ', (error as any).message);
             throw new Error('Error when fetching last commit data');
         }
     }

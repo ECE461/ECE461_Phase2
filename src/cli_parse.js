@@ -118,7 +118,7 @@ program
     .arguments('<url>')
     .description('CLI program takes in URL of a package and outputs measured metrics')
     .action(function (urlString) { return __awaiter(void 0, void 0, void 0, function () {
-    var sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, error_2;
+    var sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, result, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -136,7 +136,22 @@ program
                 return [4 /*yield*/, Metrics.getMetrics()];
             case 2:
                 metrics = _a.sent();
-                console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
+                result = {
+                    URL: repoLink,
+                    NetScore: metrics.netScore,
+                    NetScore_Latency: metrics.netLatency,
+                    RampUp: metrics.rampUpValue,
+                    RampUp_Latency: metrics.rampUpLatency,
+                    Correctness: metrics.correctnessValue,
+                    Correctness_Latency: metrics.correctnessLatency,
+                    BusFactor: metrics.busFactorValue,
+                    BusFactor_Latency: metrics.busFactorLatency,
+                    ResponsiveMaintainer: metrics.maintainerValue,
+                    ResponsiveMaintainer_Latency: metrics.maintainerLatency,
+                    License: metrics.licenseValue,
+                    License_Latency: metrics.licenseLatency
+                };
+                console.log(JSON.stringify(result));
                 return [3 /*break*/, 4];
             case 3:
                 error_2 = _a.sent();

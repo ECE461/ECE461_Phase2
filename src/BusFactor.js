@@ -72,7 +72,7 @@ var busFactor = /** @class */ (function () {
                         return [2 /*return*/, parseFloat(score.toFixed(3))];
                     case 3:
                         error_1 = _a.sent();
-                        console.error('BusFactor -> Error fetching commits:', error_1);
+                        console.error('BusFactor -> Error fetching commits:', error_1.message);
                         process.exit(1);
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];

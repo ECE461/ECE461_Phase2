@@ -35,7 +35,20 @@ export class MetricManager {
      * 
      * @returns the net score of the package
      */
-    async getMetrics() : Promise<string> {
+    async getMetrics() : Promise<{
+        netScore: number,
+        netLatency: number,
+        rampUpValue: number,
+        rampUpLatency: number,
+        correctnessValue: number,
+        correctnessLatency: number,
+        busFactorValue: number,
+        busFactorLatency: number,
+        maintainerValue: number,
+        maintainerLatency: number,
+        licenseValue: number,
+        licenseLatency: number
+    }> {
         let NetStartTime = performance.now();
         let startTime = performance.now();
         let busFactorMetric = new busFactor(this.owner, this.repoName);
@@ -71,22 +84,38 @@ export class MetricManager {
         //console.log(busFactorValue);
         // parseFloat(score.toFixed(3));
 
-        return `
-        URL: 
-        busFactorValue: ${parseFloat(busFactorValue.toFixed(3))} (Latency: ${busFactorLatency.toFixed(3)} s)
-        rampUpValue: ${parseFloat(rampUpValue.toFixed(3))} (Latency: ${rampUpLatency.toFixed(3)} s)
-        licenseValue: ${parseFloat(licenseValue.toFixed(3))} (Latency: ${licenseLatency.toFixed(3)} s)
-        maintainerValue: ${parseFloat(maintainerValue.toFixed(3))} (Latency: ${maintainerLatency.toFixed(3)} s)
-        correctnessValue: ${parseFloat(correctnessValue.toFixed(3))} (Latency: ${correctnessLatency.toFixed(3)} s)
-        Net Score: ${parseFloat(netScore.toFixed(3))} (Latency: ${netLatency.toFixed(3)} s)
-        `;
+        return {
+            netScore: parseFloat(netScore.toFixed(3)),
+            netLatency: parseFloat(netLatency.toFixed(3)),
+            rampUpValue: parseFloat(rampUpValue.toFixed(3)),
+            rampUpLatency: parseFloat(rampUpLatency.toFixed(3)),
+            correctnessValue: parseFloat(correctnessValue.toFixed(3)),
+            correctnessLatency: parseFloat(correctnessLatency.toFixed(3)),
+            busFactorValue: parseFloat(busFactorValue.toFixed(3)),
+            busFactorLatency: parseFloat(busFactorLatency.toFixed(3)),
+            maintainerValue: parseFloat(maintainerValue.toFixed(3)),
+            maintainerLatency: parseFloat(maintainerLatency.toFixed(3)),
+            licenseValue: parseFloat(licenseValue.toFixed(3)),
+            licenseLatency: parseFloat(licenseLatency.toFixed(3))
+        };
 
-        return '\nbusFactorValue: ' + parseFloat(busFactorValue.toFixed(3)) + 
-        '\n ' + 'rampUpValue: ' + parseFloat(rampUpValue.toFixed(3))
-        + '\n ' + 'liscenseValue: ' + parseFloat(licenseValue.toFixed(3))
-        + '\n ' + 'maintainerValue: ' + parseFloat(maintainerValue.toFixed(3))
-        + '\n ' + 'correctnessValue: ' + parseFloat(correctnessValue.toFixed(3))
-        + '\n ' + 'Net Score: ' + parseFloat(netScore.toFixed(3));
+
+        // return `
+        // URL: ${this.owner}/${this.repoName}
+        // busFactorValue: ${parseFloat(busFactorValue.toFixed(3))} (Latency: ${busFactorLatency.toFixed(3)} s)
+        // rampUpValue: ${parseFloat(rampUpValue.toFixed(3))} (Latency: ${rampUpLatency.toFixed(3)} s)
+        // licenseValue: ${parseFloat(licenseValue.toFixed(3))} (Latency: ${licenseLatency.toFixed(3)} s)
+        // maintainerValue: ${parseFloat(maintainerValue.toFixed(3))} (Latency: ${maintainerLatency.toFixed(3)} s)
+        // correctnessValue: ${parseFloat(correctnessValue.toFixed(3))} (Latency: ${correctnessLatency.toFixed(3)} s)
+        // Net Score: ${parseFloat(netScore.toFixed(3))} (Latency: ${netLatency.toFixed(3)} s)
+        // `;
+
+        // return '\nbusFactorValue: ' + parseFloat(busFactorValue.toFixed(3)) + 
+        // '\n ' + 'rampUpValue: ' + parseFloat(rampUpValue.toFixed(3))
+        // + '\n ' + 'liscenseValue: ' + parseFloat(licenseValue.toFixed(3))
+        // + '\n ' + 'maintainerValue: ' + parseFloat(maintainerValue.toFixed(3))
+        // + '\n ' + 'correctnessValue: ' + parseFloat(correctnessValue.toFixed(3))
+        // + '\n ' + 'Net Score: ' + parseFloat(netScore.toFixed(3));
     }
 
     /**
