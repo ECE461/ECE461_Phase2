@@ -17,14 +17,12 @@ async function initializeGit() {
 export class correctness {
   private owner: string;
   private repoName: string;
-  private githubToken: string;
   private repoDir: string;
   private repoContents: string[];
 
   constructor(owner: string, repoName: string) {
     this.owner = owner;
     this.repoName = repoName;
-    this.githubToken = process.env.GITHUB_TOKEN || '';
     this.repoDir = path.join('/tmp', `${this.repoName}-${Date.now()}`); // Unique repo dir
     this.repoContents = [];
   }
@@ -76,9 +74,7 @@ export class correctness {
       const dir = this.repoDir;
       const url = `https://github.com/${this.owner}/${this.repoName}`;
 
-      //console.log('Checking if repository exists locally...');
       if (!fs.existsSync(dir)) {
-        //console.log('Cloning the repository...');
         await git.clone({
           fs,
           http,
@@ -87,14 +83,8 @@ export class correctness {
           singleBranch: true,
           depth: 1
         });
-        //console.log('Repository cloned successfully!');
-      } else {
-        //console.log('Repository already exists locally.');
-      }
-
-      //console.log('Listing files in the repository...');
+      } 
       this.repoContents = await git.listFiles({ fs, dir });
-      //console.log('Files listed successfully:', this.repoContents);
     } catch (error) {
       console.error('CORRECTNESS -> Error fetching repository contents:', error);
     }
@@ -121,7 +111,7 @@ export class correctness {
     try {
       const response = await fetch(releasesUrl, {
         headers: {
-          Authorization: `token ${this.githubToken}`
+          Authorization: `token ${process.env.GITHUB_TOKEN}`
         }
       });
       if (!response.ok) {
@@ -208,10 +198,3 @@ export class correctness {
   }
 }
 
-// // Initialize and run the checks
-// initializeGit().then(() => {
-//   const owner = ''; // Replace with actual owner name
-//   const repoName = ''; // Replace with actual repository name
-//   const checker = new correctness(owner, repoName);
-//   checker.getCorrectnessScore().then(score => console.log(`Correctness Score: ${score}`));
-// });
