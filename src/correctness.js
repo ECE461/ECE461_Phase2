@@ -64,7 +64,6 @@ var correctness = /** @class */ (function () {
     function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
-        this.githubToken = process.env.GITHUB_TOKEN || '';
         this.repoDir = path.join('/tmp', "".concat(this.repoName, "-").concat(Date.now())); // Unique repo dir
         this.repoContents = [];
     }
@@ -134,7 +133,6 @@ var correctness = /** @class */ (function () {
                         dir = this.repoDir;
                         url = "https://github.com/".concat(this.owner, "/").concat(this.repoName);
                         if (!!fs.existsSync(dir)) return [3 /*break*/, 2];
-                        //console.log('Cloning the repository...');
                         return [4 /*yield*/, git.clone({
                                 fs: fs,
                                 http: http,
@@ -144,15 +142,12 @@ var correctness = /** @class */ (function () {
                                 depth: 1
                             })];
                     case 1:
-                        //console.log('Cloning the repository...');
                         _b.sent();
-                        return [3 /*break*/, 2];
+                        _b.label = 2;
                     case 2:
-                        //console.log('Listing files in the repository...');
                         _a = this;
                         return [4 /*yield*/, git.listFiles({ fs: fs, dir: dir })];
                     case 3:
-                        //console.log('Listing files in the repository...');
                         _a.repoContents = _b.sent();
                         return [3 /*break*/, 5];
                     case 4:
@@ -201,7 +196,7 @@ var correctness = /** @class */ (function () {
                         _a.trys.push([1, 4, , 5]);
                         return [4 /*yield*/, fetch(releasesUrl, {
                                 headers: {
-                                    Authorization: "token ".concat(this.githubToken)
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
                                 }
                             })];
                     case 2:
@@ -358,10 +353,3 @@ var correctness = /** @class */ (function () {
     return correctness;
 }());
 exports.correctness = correctness;
-// // Initialize and run the checks
-// initializeGit().then(() => {
-//   const owner = ''; // Replace with actual owner name
-//   const repoName = ''; // Replace with actual repository name
-//   const checker = new correctness(owner, repoName);
-//   checker.getCorrectnessScore().then(score => console.log(`Correctness Score: ${score}`));
-// });
