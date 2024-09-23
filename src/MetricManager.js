@@ -109,7 +109,20 @@ var MetricManager = /** @class */ (function () {
                         netLatency = (perf_hooks_1.performance.now() - NetStartTime) / 1000;
                         //console.log(busFactorValue);
                         // parseFloat(score.toFixed(3));
-                        return [2 /*return*/, "\n        busFactorValue: ".concat(parseFloat(busFactorValue.toFixed(3)), " (Latency: ").concat(busFactorLatency.toFixed(3), " s)\n        rampUpValue: ").concat(parseFloat(rampUpValue.toFixed(3)), " (Latency: ").concat(rampUpLatency.toFixed(3), " s)\n        licenseValue: ").concat(parseFloat(licenseValue.toFixed(3)), " (Latency: ").concat(licenseLatency.toFixed(3), " s)\n        maintainerValue: ").concat(parseFloat(maintainerValue.toFixed(3)), " (Latency: ").concat(maintainerLatency.toFixed(3), " s)\n        correctnessValue: ").concat(parseFloat(correctnessValue.toFixed(3)), " (Latency: ").concat(correctnessLatency.toFixed(3), " s)\n        Net Score: ").concat(parseFloat(netScore.toFixed(3)), " (Latency: ").concat(netLatency.toFixed(3), " s)\n        ")];
+                        return [2 /*return*/, {
+                                netScore: parseFloat(netScore.toFixed(3)),
+                                netLatency: parseFloat(netLatency.toFixed(3)),
+                                rampUpValue: parseFloat(rampUpValue.toFixed(3)),
+                                rampUpLatency: parseFloat(rampUpLatency.toFixed(3)),
+                                correctnessValue: parseFloat(correctnessValue.toFixed(3)),
+                                correctnessLatency: parseFloat(correctnessLatency.toFixed(3)),
+                                busFactorValue: parseFloat(busFactorValue.toFixed(3)),
+                                busFactorLatency: parseFloat(busFactorLatency.toFixed(3)),
+                                maintainerValue: parseFloat(maintainerValue.toFixed(3)),
+                                maintainerLatency: parseFloat(maintainerLatency.toFixed(3)),
+                                licenseValue: parseFloat(licenseValue.toFixed(3)),
+                                licenseLatency: parseFloat(licenseLatency.toFixed(3))
+                            }];
                 }
             });
         });

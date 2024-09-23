@@ -77,7 +77,7 @@ export class license {
       return 0;
 
     } catch (error) {
-      console.error(`getRepoLicense -> Error when fetching license in ${this.owner}/${this.repoName}: ${error}`);
+      console.error(`getRepoLicense -> Error when fetching license in ${this.owner}/${this.repoName}:`, (error as any).message);
       return 0;
     }
   }

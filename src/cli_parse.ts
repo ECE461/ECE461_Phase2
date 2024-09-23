@@ -70,6 +70,12 @@ program
   .description('CLI program takes in URL of a package and outputs measured metrics')
   .action(async (urlString: string) => {  
         try {
+            const isTokenValid = await checkGitHubToken(process.env.GITHUB_TOKEN);
+            if (!isTokenValid) {
+                console.error('Invalid GitHub token');
+                process.exit(1);
+            }
+
             // Sanitize the URL to prevent command injection
             const sanitized_urlString = sanitizeGitUrl(urlString);
             const repoLink = await getRepoLink(sanitized_urlString);
@@ -84,7 +90,25 @@ program
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
             const metrics = await Metrics.getMetrics();
-            console.log('\nMetrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
+
+            const result = {
+                URL: repoLink,
+                NetScore: metrics.netScore,
+                NetScore_Latency: metrics.netLatency,
+                RampUp: metrics.rampUpValue,
+                RampUp_Latency: metrics.rampUpLatency,
+                Correctness: metrics.correctnessValue,
+                Correctness_Latency: metrics.correctnessLatency,
+                BusFactor: metrics.busFactorValue,
+                BusFactor_Latency: metrics.busFactorLatency,
+                ResponsiveMaintainer: metrics.maintainerValue,
+                ResponsiveMaintainer_Latency: metrics.maintainerLatency,
+                License: metrics.licenseValue,
+                License_Latency: metrics.licenseLatency
+            };
+            console.log(JSON.stringify(result));
+            //console.log(JSON.stringify(result, null, 2));
+            //console.log('\nMetrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
 
         } catch (error) {
             console.error('Invalid URL:', (error as Error).message);
@@ -93,3 +117,27 @@ program
     });
 
 program.parse(process.argv);
+
+
+/**
+ * Checks if the provided GitHub token is valid.
+ * 
+ * @param token The GitHub token to check.
+ * @returns A promise that resolves to true if the token is valid, false otherwise.
+ */
+async function checkGitHubToken(token: string | undefined): Promise<boolean> {
+    if (!token) {
+        return false;
+    }
+
+    try {
+        const response = await axios.get('https://api.github.com/user', {
+            headers: {
+                Authorization: `token ${token}`
+            }
+        });
+        return response.status === 200;
+    } catch (error) {
+        return false;
+    }
+}

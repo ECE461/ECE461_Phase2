@@ -121,7 +121,7 @@ var license = /** @class */ (function () {
                         return [2 /*return*/, 0];
                     case 3:
                         error_2 = _b.sent();
-                        console.error("getRepoLicense -> Error when fetching license in ".concat(this.owner, "/").concat(this.repoName, ": ").concat(error_2));
+                        console.error("getRepoLicense -> Error when fetching license in ".concat(this.owner, "/").concat(this.repoName, ":"), error_2.message);
                         return [2 /*return*/, 0];
                     case 4: return [2 /*return*/];
                 }

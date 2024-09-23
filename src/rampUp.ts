@@ -28,14 +28,14 @@ export class rampUp {
             //const lineCount = await this.getLineCount();
             const dependenciesCount = await this.getDependenciesCount();
 
-            console.log('Repository Stats:', {
-                fileCount,
-                //lineCount,
-                dependenciesCount,
-                size,
-                //stargazers_count,
-                //forks_count
-            });
+            // console.log('Repository Stats:', {
+            //     fileCount,
+            //     //lineCount,
+            //     dependenciesCount,
+            //     size,
+            //     //stargazers_count,
+            //     //forks_count
+            // });
 
             const score = this.calculateScore({
                 fileCount,

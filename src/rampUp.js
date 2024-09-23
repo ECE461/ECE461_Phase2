@@ -66,14 +66,6 @@ var rampUp = /** @class */ (function () {
                         return [4 /*yield*/, this.getDependenciesCount()];
                     case 3:
                         dependenciesCount = _b.sent();
-                        console.log('Repository Stats:', {
-                            fileCount: fileCount,
-                            //lineCount,
-                            dependenciesCount: dependenciesCount,
-                            size: size,
-                            //stargazers_count,
-                            //forks_count
-                        });
                         score = this.calculateScore({
                             fileCount: fileCount,
                             //lineCount,
