@@ -45,7 +45,7 @@ var rampUp = /** @class */ (function () {
         this.repoOwner = repoOwner;
         this.repoName = repoName;
     }
-    rampUp.prototype.getRepoStats = function () {
+    rampUp.prototype.getRampUpScore = function () {
         return __awaiter(this, void 0, void 0, function () {
             var response, _a, size, stargazers_count, forks_count, fileCount, dependenciesCount, score, error_1;
             return __generator(this, function (_b) {
@@ -78,7 +78,7 @@ var rampUp = /** @class */ (function () {
                     case 4:
                         error_1 = _b.sent();
                         console.error('RAMPUP -> Error fetching repository stats:', error_1);
-                        return [3 /*break*/, 5];
+                        return [2 /*return*/, 0]; // Return 0 in case of an error
                     case 5: return [2 /*return*/];
                 }
             });
@@ -146,7 +146,7 @@ var rampUp = /** @class */ (function () {
                     case 2:
                         error_2 = _a.sent();
                         console.error('getDependenciesCount -> Error fetching dependencies count:', error_2);
-                        return [2 /*return*/, undefined]; // Return undefined in case of an error
+                        return [2 /*return*/, 0]; // Return undefined in case of an error
                     case 3: return [2 /*return*/];
                 }
             });
@@ -161,7 +161,8 @@ var rampUp = /** @class */ (function () {
         ;
         var fileCountScore = 1 - Math.min(fileCount / rampUp.MAX_FILE_COUNT, 1);
         //const lineCountScore = 1 - Math.min(lineCount / rampUp.MAX_LINE_COUNT, 1);
-        var dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        //const dependenciesCountScore = dependenciesCount !== undefined ? 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1) : 0;
+        var dependenciesCountScore = 1 - Math.min(dependenciesCount / rampUp.MAX_DEPENDENCIES_COUNT, 1);
         var sizeScore = 1 - Math.min(size / rampUp.MAX_SIZE, 1);
         //const stargazersCountScore = Math.min(stargazers_count / rampUp.MAX_STARGAZERS_COUNT, 1);
         //const forksCountScore = Math.min(forks_count / rampUp.MAX_FORKS_COUNT, 1);

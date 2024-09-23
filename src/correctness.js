@@ -115,7 +115,8 @@ var correctness = /** @class */ (function () {
                         catch (error) {
                             console.error('CORRECTNESS -> Error removing repository directory:', error);
                         }
-                        return [2 /*return*/, finalScore];
+                        //return finalScore;
+                        return [2 /*return*/, parseFloat(finalScore.toFixed(3))];
                 }
             });
         });
