@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRepoLink = exports.sanitizeGitUrl = void 0;
+exports.checkGitHubToken = checkGitHubToken;
 var commander_1 = require("commander");
 var url_1 = require("url");
 var MetricManager_1 = require("./MetricManager");
@@ -118,14 +119,21 @@ program
     .arguments('<url>')
     .description('CLI program takes in URL of a package and outputs measured metrics')
     .action(function (urlString) { return __awaiter(void 0, void 0, void 0, function () {
-    var sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, result, error_2;
+    var isTokenValid, sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, result, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 3, , 4]);
+                _a.trys.push([0, 4, , 5]);
+                return [4 /*yield*/, checkGitHubToken(process.env.GITHUB_TOKEN)];
+            case 1:
+                isTokenValid = _a.sent();
+                if (!isTokenValid) {
+                    console.error('Invalid GitHub token');
+                    process.exit(1);
+                }
                 sanitized_urlString = (0, exports.sanitizeGitUrl)(urlString);
                 return [4 /*yield*/, (0, exports.getRepoLink)(sanitized_urlString)];
-            case 1:
+            case 2:
                 repoLink = _a.sent();
                 if (!repoLink) {
                     console.error('Invalid URL:', urlString);
@@ -134,7 +142,7 @@ program
                 parsedUrl = new url_1.URL(repoLink);
                 Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
                 return [4 /*yield*/, Metrics.getMetrics()];
-            case 2:
+            case 3:
                 metrics = _a.sent();
                 result = {
                     URL: repoLink,
@@ -152,14 +160,48 @@ program
                     License_Latency: metrics.licenseLatency
                 };
                 console.log(JSON.stringify(result));
-                return [3 /*break*/, 4];
-            case 3:
+                return [3 /*break*/, 5];
+            case 4:
                 error_2 = _a.sent();
                 console.error('Invalid URL:', error_2.message);
                 process.exit(1);
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
 program.parse(process.argv);
+/**
+ * Checks if the provided GitHub token is valid.
+ *
+ * @param token The GitHub token to check.
+ * @returns A promise that resolves to true if the token is valid, false otherwise.
+ */
+function checkGitHubToken(token) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!token) {
+                        return [2 /*return*/, false];
+                    }
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, axios_1.default.get('https://api.github.com/user', {
+                            headers: {
+                                Authorization: "token ".concat(token)
+                            }
+                        })];
+                case 2:
+                    response = _a.sent();
+                    return [2 /*return*/, response.status === 200];
+                case 3:
+                    error_3 = _a.sent();
+                    return [2 /*return*/, false];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}

@@ -125,7 +125,7 @@ program.parse(process.argv);
  * @param token The GitHub token to check.
  * @returns A promise that resolves to true if the token is valid, false otherwise.
  */
-async function checkGitHubToken(token: string | undefined): Promise<boolean> {
+export async function checkGitHubToken(token: string | undefined): Promise<boolean> {
     if (!token) {
         return false;
     }
