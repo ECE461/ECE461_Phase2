@@ -112,11 +112,19 @@ var maintainer = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 4, , 5]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        return [4 /*yield*/, axios_1.default.get(url, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 2:
                         response = _a.sent();
                         openIssues = response.data.open_issues_count;
-                        return [4 /*yield*/, axios_1.default.get(closedUrl)];
+                        return [4 /*yield*/, axios_1.default.get(closedUrl, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 3:
                         closedResponse = _a.sent();
                         closedIssues = 0;
@@ -158,7 +166,11 @@ var maintainer = /** @class */ (function () {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, axios_1.default.get(url)];
+                        return [4 /*yield*/, axios_1.default.get(url, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
                     case 2:
                         response = _a.sent();
                         lastCommit = response.data[0];

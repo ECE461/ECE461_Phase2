@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getRepoLink = exports.sanitizeGitUrl = void 0;
 var commander_1 = require("commander");
 var url_1 = require("url");
 var MetricManager_1 = require("./MetricManager");
@@ -47,6 +48,7 @@ var program = new commander_1.Command();
 var sanitizeGitUrl = function (url) {
     return url.replace(/[;`<>]/g, '');
 };
+exports.sanitizeGitUrl = sanitizeGitUrl;
 // Function to check if the URL is from npm or GitHub
 var getRepoLink = function (url) { return __awaiter(void 0, void 0, void 0, function () {
     var npmRegex, githubRegex, match, packageName, npmApiUrl, response, repoUrl, newrepoUrl, error_1;
@@ -100,6 +102,7 @@ var getRepoLink = function (url) { return __awaiter(void 0, void 0, void 0, func
         }
     });
 }); };
+exports.getRepoLink = getRepoLink;
 // site hostnames
 /*
 let hostNPM:string  = 'npm.com';
@@ -120,8 +123,8 @@ program
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 3, , 4]);
-                sanitized_urlString = sanitizeGitUrl(urlString);
-                return [4 /*yield*/, getRepoLink(sanitized_urlString)];
+                sanitized_urlString = (0, exports.sanitizeGitUrl)(urlString);
+                return [4 /*yield*/, (0, exports.getRepoLink)(sanitized_urlString)];
             case 1:
                 repoLink = _a.sent();
                 if (!repoLink) {
@@ -133,7 +136,7 @@ program
                 return [4 /*yield*/, Metrics.getMetrics()];
             case 2:
                 metrics = _a.sent();
-                console.log('\nMetrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
+                console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
                 return [3 /*break*/, 4];
             case 3:
                 error_2 = _a.sent();

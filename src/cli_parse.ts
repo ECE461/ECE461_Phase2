@@ -8,12 +8,12 @@ dotenv.config();
 const program = new Command();
 
 // Sanitize the URL to prevent command injection
-const sanitizeGitUrl = (url: string) => {
+export const sanitizeGitUrl = (url: string) => {
     return url.replace(/[;`<>]/g, '');
 };
 
 // Function to check if the URL is from npm or GitHub
-const getRepoLink = async (url: string): Promise<string | null> => {
+export const getRepoLink = async (url: string): Promise<string | null> => {
     const npmRegex = /^https?:\/\/(www\.)?npmjs\.com\/package\/([^\/]+)$/;
     const githubRegex = /^https?:\/\/(www\.)?github\.com\/([^\/]+\/[^\/]+)$/;
 
@@ -68,7 +68,7 @@ program
   //.command('url <url>')             // command to run i.e.  "node cli_parse.ts url <url>"
   .arguments('<url>')
   .description('CLI program takes in URL of a package and outputs measured metrics')
-  .action(async (urlString: string) => {  
+  .action(async (urlString: string) => {
         try {
             // Sanitize the URL to prevent command injection
             const sanitized_urlString = sanitizeGitUrl(urlString);
@@ -84,7 +84,7 @@ program
             // Extract owner and repository name and get metrics
             let Metrics = new MetricManager(parsedUrl.pathname);
             const metrics = await Metrics.getMetrics();
-            console.log('\nMetrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
+            console.log('Metrics: [', metrics, '] for', Metrics.getOwner(), '/', Metrics.getRepoName());
 
         } catch (error) {
             console.error('Invalid URL:', (error as Error).message);

@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import {rampUp} from '../../src/rampUp';
 require('dotenv').config();
 
@@ -10,12 +11,21 @@ describe('Ramp Up Tests', () => {
 
     });
 
-    test('Get File Count', async () => {
+    test('Get different repo stats', async () => {
         const repo = new rampUp('lodash', 'lodash');
         const fileCount = await repo.getRepoStats();
         expect(fileCount).toBe(.992);
 
     });
 
+    test('Get empty repo', async () => {
+        try {
+            const repo = new rampUp('', '');
+            await repo.getRepoStats();
+        } catch (error) {
+            expect(error).toBeInstanceOf(AxiosError);
+        }
+
+    });
 
 });

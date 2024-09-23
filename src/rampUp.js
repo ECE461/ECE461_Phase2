@@ -66,14 +66,6 @@ var rampUp = /** @class */ (function () {
                         return [4 /*yield*/, this.getDependenciesCount()];
                     case 3:
                         dependenciesCount = _b.sent();
-                        console.log('Repository Stats:', {
-                            fileCount: fileCount,
-                            //lineCount,
-                            dependenciesCount: dependenciesCount,
-                            size: size,
-                            //stargazers_count,
-                            //forks_count
-                        });
                         score = this.calculateScore({
                             fileCount: fileCount,
                             //lineCount,
@@ -109,43 +101,31 @@ var rampUp = /** @class */ (function () {
             });
         });
     };
-    rampUp.prototype.getLineCount = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var response, tree, lineCount, _i, tree_1, file, fileResponse;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, axios_1.default.get("https://api.github.com/repos/".concat(this.repoOwner, "/").concat(this.repoName, "/git/trees/master?recursive=1"), {
-                            headers: {
-                                Authorization: "token ".concat(process.env.GITHUB_TOKEN)
-                            }
-                        })];
-                    case 1:
-                        response = _a.sent();
-                        tree = response.data.tree;
-                        lineCount = 0;
-                        _i = 0, tree_1 = tree;
-                        _a.label = 2;
-                    case 2:
-                        if (!(_i < tree_1.length)) return [3 /*break*/, 5];
-                        file = tree_1[_i];
-                        if (!(file.type === 'blob')) return [3 /*break*/, 4];
-                        return [4 /*yield*/, axios_1.default.get(file.url, {
-                                headers: {
-                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
-                                }
-                            })];
-                    case 3:
-                        fileResponse = _a.sent();
-                        lineCount += fileResponse.data.content.split('\n').length;
-                        _a.label = 4;
-                    case 4:
-                        _i++;
-                        return [3 /*break*/, 2];
-                    case 5: return [2 /*return*/, lineCount];
+    /*
+        private async getLineCount(): Promise<number> { // SCRAPED
+            // Implement logic to count lines of code in the repository
+            const response = await axios.get(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/git/trees/master?recursive=1`, {
+                headers: {
+                    Authorization: `token ${process.env.GITHUB_TOKEN}`
                 }
             });
-        });
-    };
+            const tree = response.data.tree;
+            let lineCount = 0;
+    
+            for (const file of tree) {
+                if (file.type === 'blob') {
+                const fileResponse = await axios.get(file.url, {
+                    headers: {
+                        Authorization: `token ${process.env.GITHUB_TOKEN}`
+                    }
+                });
+                lineCount += fileResponse.data.content.split('\n').length;
+                }
+            }
+    
+            return lineCount;
+        }
+    */
     rampUp.prototype.getDependenciesCount = function () {
         return __awaiter(this, void 0, void 0, function () {
             var response, packageJson, dependencies, error_2;
@@ -191,7 +171,7 @@ var rampUp = /** @class */ (function () {
         return totalScore;
     };
     rampUp.MAX_FILE_COUNT = 1000;
-    rampUp.MAX_LINE_COUNT = 100000;
+    //private static readonly MAX_LINE_COUNT = 100000;
     rampUp.MAX_DEPENDENCIES_COUNT = 100;
     rampUp.MAX_SIZE = 10000000; // in KB
     return rampUp;
