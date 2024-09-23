@@ -36,130 +36,192 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRepoLink = exports.sanitizeGitUrl = void 0;
+exports.CLIParser = void 0;
 var commander_1 = require("commander");
 var url_1 = require("url");
 var MetricManager_1 = require("./MetricManager");
 var axios_1 = require("axios");
 var dotenv = require("dotenv");
 dotenv.config();
-var program = new commander_1.Command();
-// Sanitize the URL to prevent command injection
-var sanitizeGitUrl = function (url) {
-    return url.replace(/[;`<>]/g, '');
-};
-exports.sanitizeGitUrl = sanitizeGitUrl;
-// Function to check if the URL is from npm or GitHub
-var getRepoLink = function (url) { return __awaiter(void 0, void 0, void 0, function () {
-    var npmRegex, githubRegex, match, packageName, npmApiUrl, response, repoUrl, newrepoUrl, error_1;
-    var _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                npmRegex = /^https?:\/\/(www\.)?npmjs\.com\/package\/([^\/]+)$/;
-                githubRegex = /^https?:\/\/(www\.)?github\.com\/([^\/]+\/[^\/]+)$/;
-                if (!githubRegex.test(url)) return [3 /*break*/, 1];
-                return [2 /*return*/, url];
-            case 1:
-                if (!npmRegex.test(url)) return [3 /*break*/, 6];
-                match = url.match(npmRegex);
-                if (!match) return [3 /*break*/, 5];
-                packageName = match[2];
-                npmApiUrl = "https://registry.npmjs.org/".concat(packageName);
-                _b.label = 2;
-            case 2:
-                _b.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, axios_1.default.get(npmApiUrl, {
-                        headers: {
-                            Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+var CLIParser = /** @class */ (function () {
+    function CLIParser() {
+        this.program = new commander_1.Command();
+        this.configureProgram();
+    }
+    CLIParser.prototype.configureProgram = function () {
+        var _this = this;
+        this.program
+            .name('cli_parse')
+            .description('CLI program to parse URL and output measured metrics')
+            .version('0.0.1');
+        this.program
+            .arguments('<url>')
+            .description('CLI program takes in URL of a package and outputs measured metrics')
+            .action(function (urlString) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.handleAction(urlString)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+    };
+    CLIParser.prototype.run = function (argv) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.program.parseAsync(argv)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CLIParser.prototype.handleAction = function (urlString) {
+        return __awaiter(this, void 0, void 0, function () {
+            var isTokenValid, sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, result, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 4, , 5]);
+                        return [4 /*yield*/, this.checkGitHubToken(process.env.GITHUB_TOKEN)];
+                    case 1:
+                        isTokenValid = _a.sent();
+                        if (!isTokenValid) {
+                            console.error('Invalid GitHub token');
+                            process.exit(1);
                         }
-                    })];
-            case 3:
-                response = _b.sent();
-                repoUrl = (_a = response.data.repository) === null || _a === void 0 ? void 0 : _a.url;
-                if (repoUrl) {
-                    // Convert git+https URLs to https URLs
-                    repoUrl.replace(/^git\+/, '');
-                    if (repoUrl.endsWith('.git')) {
-                        newrepoUrl = repoUrl.slice(0, -4);
-                        return [2 /*return*/, newrepoUrl];
-                    }
-                    return [2 /*return*/, repoUrl];
+                        sanitized_urlString = this.sanitizeGitUrl(urlString);
+                        return [4 /*yield*/, this.getRepoLink(sanitized_urlString)];
+                    case 2:
+                        repoLink = _a.sent();
+                        if (!repoLink) {
+                            console.error('Invalid URL:', urlString);
+                            process.exit(1);
+                        }
+                        parsedUrl = new url_1.URL(repoLink);
+                        Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
+                        return [4 /*yield*/, Metrics.getMetrics()];
+                    case 3:
+                        metrics = _a.sent();
+                        result = {
+                            URL: repoLink,
+                            NetScore: metrics.netScore,
+                            NetScore_Latency: metrics.netLatency,
+                            RampUp: metrics.rampUpValue,
+                            RampUp_Latency: metrics.rampUpLatency,
+                            Correctness: metrics.correctnessValue,
+                            Correctness_Latency: metrics.correctnessLatency,
+                            BusFactor: metrics.busFactorValue,
+                            BusFactor_Latency: metrics.busFactorLatency,
+                            ResponsiveMaintainer: metrics.maintainerValue,
+                            ResponsiveMaintainer_Latency: metrics.maintainerLatency,
+                            License: metrics.licenseValue,
+                            License_Latency: metrics.licenseLatency
+                        };
+                        console.log(JSON.stringify(result));
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_1 = _a.sent();
+                        console.error('Invalid URL:', error_1.message);
+                        process.exit(1);
+                        return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
                 }
-                else {
-                    console.error('No repository found for npm package:', packageName);
+            });
+        });
+    };
+    CLIParser.prototype.checkGitHubToken = function (token) {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, error_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!token) {
+                            return [2 /*return*/, false];
+                        }
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get('https://api.github.com/user', {
+                                headers: {
+                                    Authorization: "token ".concat(token)
+                                }
+                            })];
+                    case 2:
+                        response = _a.sent();
+                        return [2 /*return*/, response.status === 200];
+                    case 3:
+                        error_2 = _a.sent();
+                        return [2 /*return*/, false];
+                    case 4: return [2 /*return*/];
                 }
-                return [3 /*break*/, 5];
-            case 4:
-                error_1 = _b.sent();
-                console.error('Error fetching npm package information:', error_1);
-                return [3 /*break*/, 5];
-            case 5: return [3 /*break*/, 7];
-            case 6:
-                console.error('Invalid URL:', url);
-                _b.label = 7;
-            case 7: return [2 /*return*/, null];
-        }
-    });
-}); };
-exports.getRepoLink = getRepoLink;
-// site hostnames
-/*
-let hostNPM:string  = 'npm.com';
-let hostGITHUB:string  = 'github.com';
-*/
-// program metadata
-program
-    .name('cli_parse')
-    .description('CLI program to parse URL and output measured metrics')
-    .version('0.0.1');
-program
-    //.command('url <url>')             // command to run i.e.  "node cli_parse.ts url <url>"
-    .arguments('<url>')
-    .description('CLI program takes in URL of a package and outputs measured metrics')
-    .action(function (urlString) { return __awaiter(void 0, void 0, void 0, function () {
-    var sanitized_urlString, repoLink, parsedUrl, Metrics, metrics, result, error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 3, , 4]);
-                sanitized_urlString = (0, exports.sanitizeGitUrl)(urlString);
-                return [4 /*yield*/, (0, exports.getRepoLink)(sanitized_urlString)];
-            case 1:
-                repoLink = _a.sent();
-                if (!repoLink) {
-                    console.error('Invalid URL:', urlString);
-                    process.exit(1);
+            });
+        });
+    };
+    CLIParser.prototype.sanitizeGitUrl = function (url) {
+        return url.replace(/[;`<>]/g, '');
+    };
+    CLIParser.prototype.getRepoLink = function (url) {
+        return __awaiter(this, void 0, void 0, function () {
+            var npmRegex, githubRegex, match, packageName, npmApiUrl, response, repoUrl, sanitizedRepoUrl, error_3;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        npmRegex = /^https?:\/\/(www\.)?npmjs\.com\/package\/([^\/]+)$/;
+                        githubRegex = /^https?:\/\/(www\.)?github\.com\/([^\/]+\/[^\/]+)$/;
+                        if (!githubRegex.test(url)) return [3 /*break*/, 1];
+                        return [2 /*return*/, url];
+                    case 1:
+                        if (!npmRegex.test(url)) return [3 /*break*/, 6];
+                        match = url.match(npmRegex);
+                        if (!match) return [3 /*break*/, 5];
+                        packageName = match[2];
+                        npmApiUrl = "https://registry.npmjs.org/".concat(packageName);
+                        _b.label = 2;
+                    case 2:
+                        _b.trys.push([2, 4, , 5]);
+                        return [4 /*yield*/, axios_1.default.get(npmApiUrl, {
+                                headers: {
+                                    Authorization: "token ".concat(process.env.GITHUB_TOKEN)
+                                }
+                            })];
+                    case 3:
+                        response = _b.sent();
+                        repoUrl = (_a = response.data.repository) === null || _a === void 0 ? void 0 : _a.url;
+                        if (repoUrl) {
+                            sanitizedRepoUrl = repoUrl.replace(/^git\+/, '');
+                            if (sanitizedRepoUrl.endsWith('.git')) {
+                                return [2 /*return*/, sanitizedRepoUrl.slice(0, -4)];
+                            }
+                            return [2 /*return*/, sanitizedRepoUrl];
+                        }
+                        else {
+                            console.error('No repository found for npm package:', packageName);
+                        }
+                        return [3 /*break*/, 5];
+                    case 4:
+                        error_3 = _b.sent();
+                        console.error('Error fetching npm package information:', error_3);
+                        return [3 /*break*/, 5];
+                    case 5: return [3 /*break*/, 7];
+                    case 6:
+                        console.error('Invalid URL:', url);
+                        _b.label = 7;
+                    case 7: return [2 /*return*/, null];
                 }
-                parsedUrl = new url_1.URL(repoLink);
-                Metrics = new MetricManager_1.MetricManager(parsedUrl.pathname);
-                return [4 /*yield*/, Metrics.getMetrics()];
-            case 2:
-                metrics = _a.sent();
-                result = {
-                    URL: repoLink,
-                    NetScore: metrics.netScore,
-                    NetScore_Latency: metrics.netLatency,
-                    RampUp: metrics.rampUpValue,
-                    RampUp_Latency: metrics.rampUpLatency,
-                    Correctness: metrics.correctnessValue,
-                    Correctness_Latency: metrics.correctnessLatency,
-                    BusFactor: metrics.busFactorValue,
-                    BusFactor_Latency: metrics.busFactorLatency,
-                    ResponsiveMaintainer: metrics.maintainerValue,
-                    ResponsiveMaintainer_Latency: metrics.maintainerLatency,
-                    License: metrics.licenseValue,
-                    License_Latency: metrics.licenseLatency
-                };
-                console.log(JSON.stringify(result));
-                return [3 /*break*/, 4];
-            case 3:
-                error_2 = _a.sent();
-                console.error('Invalid URL:', error_2.message);
-                process.exit(1);
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
-        }
-    });
-}); });
-program.parse(process.argv);
+            });
+        });
+    };
+    return CLIParser;
+}());
+exports.CLIParser = CLIParser;
+// If this file is run directly, execute the CLI
+if (require.main === module) {
+    var cliParser = new CLIParser();
+    cliParser.run(process.argv);
+}

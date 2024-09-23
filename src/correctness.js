@@ -64,7 +64,7 @@ var correctness = /** @class */ (function () {
     function correctness(owner, repoName) {
         this.owner = owner;
         this.repoName = repoName;
-        this.repoDir = path.join('/tmp', "".concat(this.repoName, "-").concat(Date.now()));
+        this.repoDir = path.join('/tmp', "".concat(this.repoName, "-").concat(Date.now())); // Unique repo dir
         this.repoContents = [];
     }
     correctness.prototype.getCorrectnessScore = function () {
