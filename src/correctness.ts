@@ -3,16 +3,10 @@ import * as path from 'path';
 import 'es6-promise/auto';
 import 'isomorphic-fetch';
 import * as dotenv from 'dotenv';
+import * as git from 'isomorphic-git';
+import http from 'isomorphic-git/http/node';
 
 dotenv.config();
-
-let git: any;
-let http: any;
-
-async function initializeGit() {
-  git = await import('isomorphic-git');
-  http = await import('isomorphic-git/http/node');
-}
 
 export class correctness {
   private owner: string;
@@ -28,7 +22,6 @@ export class correctness {
   }
 
   public async getCorrectnessScore(): Promise<number> {
-    await initializeGit();
     await this.fetchRepoContents();
 
     // Run checks concurrently

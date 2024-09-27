@@ -1,8 +1,7 @@
 {
     "compilerOptions": {
       "target": "ES6",                        // Specify ECMAScript target version
-      "module": "Node16",                      // Specify module code generation
-      "moduleResolution": "node16",           // Use Node.js module resolution strategy
+      "module": "commonjs",                      // Specify module code generation
       "strict": true,                         // Enable all strict type-checking options
       "esModuleInterop": true,                // Enable compatibility with CommonJS modules
       "skipLibCheck": true,                   // Skip type checking of declaration files
