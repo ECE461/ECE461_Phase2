@@ -2,64 +2,64 @@
 
 import sys
 import subprocess
-import re
+import os
+import json
 
 def install():
-    print("Installing TypeScript dependencies...")
-
-    dependencies = ["commander", "axios", "url", "jest", "isomorphic-git"]
-    for dep in dependencies:
-        try:
-            print(f"Installing {dep}...")
-            subprocess.run(["npm", "install", dep], check=True)
-            print(f"{dep} installed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error installing {dep}: {e}")
-            sys.exit(1)
-
-    print(f"{len(dependencies)} Successfully Installed")
+    try:
+        subprocess.run(["npm", "install"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"Dependencies installed successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing dependencies: {e}")
+        sys.exit(1)
 
 def tests():
-    print("Running Tests")
-    subprocess.run(["npm", "test"], text=True)
-    
-    # print(result.stdout)
-    # Extract line coverage for all files
-    # coverage_match = re.search(r'All files\s*\|\s*[\d.]+\s*\|\s*[\d.]+\s*\|\s*[\d.]+\s*\|\s*([\d.]+)', result.stdout)
-    # coverage = coverage_match.group(1) if coverage_match else "0"
-    
-    # # Extract test results
-    # tests_match = re.search(r'Tests:\s+(\d+)\s+failed,\s+(\d+)\s+passed,\s+(\d+)\s+total', result.stdout) or \
-    #               re.search(r'Tests:\s+(\d+)\s+total,\s+(\d+)\s+failed,\s+(\d+)\s+passed', result.stdout) or \
-    #               re.search(r'Tests:\s+(\d+)\s+passed,\s+(\d+)\s+failed,\s+(\d+)\s+total', result.stdout)
-    
-    # if tests_match:
-    #     failed = int(tests_match.group(1))
-    #     passed = int(tests_match.group(2))
-    #     total = int(tests_match.group(3))
-    # else:
-    #     print("Failed to match test results")
-    #     failed = 0
-    #     passed = 0
-    #     total = 0
-    
-    # # Print the results in the desired format
-    # print(f"Total: {failed}")
-    # print(f"Passed: {passed}")
-    # print(f"Coverage: {coverage}%")
-    # print(f"{passed}/{total} test cases passed. {coverage}% line coverage achieved.")
+    try:
+        # Execute jest command
+        result = subprocess.run(
+            ["npx", "jest", "--json", "--coverage", "--silent"],
+            text=True,
+            capture_output=True,
+            check=True
+        )
+
+        # Deserialize the Jest output from JSON format
+        test_results = json.loads(result.stdout)
+        total_tests = test_results["numTotalTests"]
+        passed_tests = test_results["numPassedTests"]
+
+        # Calculate the coverage percentage
+        coverage_data = test_results.get("coverageMap", {})
+        lines_total = sum(len(file_data['statementMap']) for file_data in coverage_data.values())
+        lines_covered = sum(1 for file_data in coverage_data.values() 
+                    for line_key in file_data['statementMap'] 
+                    if file_data['s'].get(line_key, 0) > 0)
+        coverage_percentage = (lines_covered / lines_total * 100) if lines_total > 0 else 0
+
+        # Final Test Results
+        print(f"Total: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Coverage: {round(coverage_percentage)}%")
+        print(f"{passed_tests}/{total_tests} test cases passed. {round(coverage_percentage)}% line coverage achieved.")
+
+    except subprocess.CalledProcessError as err:
+        # logging.info('Failed to run tests: %s', err.stderr)
+        raise RuntimeError("There was an error executing Jest. Please check the logs.")
+
+    except Exception as error:
+        # logging.info("Encountered an issue while executing execute_tests()")
+        # logging.debug(error)
+        raise RuntimeError("An error occurred while running Jest. Check the logs for more information.")
 
 def URL_FILE(file_path):
     try:
-        subprocess.run(["tsc", "./src/cli_parse.ts"], check=True)
         with open(file_path, 'r') as file:
             urls = file.readlines()
         
         for url in urls:
             url = url.strip()
             if url:
-                #print(f"Processing URL: {url}")
-                result = subprocess.run(["node", "./src/cli_parse.js", url], capture_output=True, text=True)
+                result = subprocess.run(["npx", "ts-node", "./src/cli_parse.ts", url], capture_output=True, text=True)
                 print(result.stdout)
                 if result.stderr:
                     print(result.stderr, file=sys.stderr)
@@ -78,6 +78,11 @@ if __name__ == '__main__':
     if sys.argv[1] == 'install':
         install()
         sys.exit(0)
+
+    # Check if GITHUB TOKEN HAS BEEN SET:
+    if not os.getenv('GITHUB_TOKEN'):
+        print("Please set the GITHUB_TOKEN environment variable.")
+        sys.exit(1)
 
     if sys.argv[1] == 'test':
         tests()
