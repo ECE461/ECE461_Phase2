@@ -4,3 +4,5 @@ typescript testing
 Sample Files for testing
 .env
 coverage/
+*.log
+*.pyc
