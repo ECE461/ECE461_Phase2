@@ -1,4 +1,4 @@
-import { maintainer } from '../../src/maintainer';
+import { maintainer } from '../../webpage-461/src/maintainer';
 import axios from 'axios';
 require('dotenv').config();
 

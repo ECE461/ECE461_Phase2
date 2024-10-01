@@ -1,4 +1,4 @@
-import { correctness } from '../../src/correctness';
+import { correctness } from '../../webpage-461/src/correctness';
 require('dotenv').config();
 
 jest.setTimeout(20000); // Set timeout to 10 seconds

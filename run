@@ -59,7 +59,7 @@ def URL_FILE(file_path):
         for url in urls:
             url = url.strip()
             if url:
-                result = subprocess.run(["npx", "ts-node", "./src/cli_parse.ts", url], capture_output=True, text=True)
+                result = subprocess.run(["npx", "ts-node", "./webpage-461/src/cli_parse.ts", url], capture_output=True, text=True)
                 print(result.stdout)
                 if result.stderr:
                     print(result.stderr, file=sys.stderr)

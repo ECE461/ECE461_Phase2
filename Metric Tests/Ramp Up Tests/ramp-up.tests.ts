@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import axios from 'axios';
-import {rampUp} from '../../src/rampUp';
+import {rampUp} from '../../webpage-461/src/app/rampUp';
 require('dotenv').config();
 
 jest.mock('axios');

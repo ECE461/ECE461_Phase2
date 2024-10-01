@@ -1,9 +1,9 @@
 // takes info from API and outputs metrics
-import { busFactor } from "./busFactor";
-import { maintainer } from "./maintainer";
-import { rampUp } from "./rampUp";
-import { license } from "./findLicense";
-import { correctness } from "./correctness";
+import { busFactor } from "../src/busFactor";
+import { maintainer } from "../src/maintainer";
+import { rampUp } from "../src/rampUp";
+import { license } from "../src/findLicense";
+import { correctness } from "../src/correctness";
 import * as dotenv from 'dotenv';
 import { performance } from 'perf_hooks';
 dotenv.config();

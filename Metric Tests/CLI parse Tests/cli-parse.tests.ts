@@ -1,7 +1,7 @@
-import { CLIParser } from '../../src/cli_parse';
+import { CLIParser } from '../../webpage-461/src/cli_parse';
 import { Command } from 'commander';
 import axios from 'axios';
-import { MetricManager } from '../../src/MetricManager';
+import { MetricManager } from '../../webpage-461/src/app/MetricManager';
 require('dotenv').config();
 
 jest.mock('axios');

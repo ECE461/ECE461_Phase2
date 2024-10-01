@@ -1,4 +1,4 @@
-import { MetricManager } from '../../src/MetricManager';
+import { MetricManager } from '../../webpage-461/src/app/MetricManager';
 require('dotenv').config();
 
 

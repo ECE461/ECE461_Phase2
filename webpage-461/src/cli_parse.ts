@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { URL } from 'url';
-import { MetricManager } from './MetricManager';
+import { MetricManager } from '../src/MetricManager';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
 dotenv.config();

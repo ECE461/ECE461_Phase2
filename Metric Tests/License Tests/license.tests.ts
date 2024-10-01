@@ -1,4 +1,4 @@
-import { license } from '../../src/findLicense';
+import { license } from '../../webpage-461/src/findLicense';
 import axios from 'axios';
 require('dotenv').config();
 

@@ -1,4 +1,4 @@
-import { busFactor } from '../../src/busFactor';
+import { busFactor } from '../../webpage-461/src/busFactor';
 import axios from 'axios';
 require('dotenv').config();
 
