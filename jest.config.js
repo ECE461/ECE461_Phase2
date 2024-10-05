@@ -1,10 +1,24 @@
 module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    testMatch: ['**/Metric Tests/**/*.tests.ts'],     // look for test files in metric test folder
-    collectCoverage: true,                      // collect coverage
-    moduleDirectories: ['node_modules', 'src'],        // import the modules
-    rootDir: './',                              // specify root directories
-    coverageReporters: ['json'],
-    collectCoverageFrom: ['src/*.ts'],       // where actual program files are
+    projects: [
+        {
+            preset: 'ts-jest',
+            displayName: 'frontend',
+            rootDir: './frontend',
+            testEnvironment: 'node',
+            testMatch: ['<rootDir>/Tests/**/*.tests.ts'],
+            collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
+            moduleDirectories: ['node_modules', 'src'],
+            testPathIgnorePatterns: ['<rootDir>/node_modules/'],
+        },
+        {
+            preset: 'ts-jest',
+            displayName: 'backend',
+            rootDir: './backend',
+            testEnvironment: 'node',
+            testMatch: ['<rootDir>/Tests/**/*.tests.ts'],
+            collectCoverageFrom: ['<rootDir>/src/**/*.ts'],
+            moduleDirectories: ['node_modules', 'src'],
+            testPathIgnorePatterns: ['<rootDir>/node_modules/'],
+        }
+    ],
 }
