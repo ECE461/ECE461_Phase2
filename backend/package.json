@@ -1,0 +1,45 @@
+{
+  "name": "my-package-manager",
+  "version": "1.0.0",
+  "description": "A package manager that ranks packages based on various factors.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "deepclean": "rm -rf node_modules && rm -f package-lock.json && npm cache clean --force",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.11.8",
+    "@nextui-org/react": "^2.4.8",
+    "@octokit/rest": "^21.0.2",
+    "@types/react": "18.3.10",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "es6-promise": "^4.2.8",
+    "isomorphic-fetch": "^3.0.0",
+    "isomorphic-git": "^1.27.1",
+    "react": "^18.3.1",
+    "next": "14.2.13",
+    "ts-node": "^10.9.2",
+    "url": "^0.11.4",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.12.0",
+    "@types/isomorphic-fetch": "^0.0.39",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^22.7.4",
+    "commander": "^12.1.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "jest": "^29.7.0",
+    "prettier": "^2.2.1",
+    "ts-jest": "^29.2.5",
+    "typescript": "^4.9.5"
+  }
+}

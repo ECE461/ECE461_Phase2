@@ -1,8 +1,8 @@
 node_modules/
-package-lock.json
 typescript testing
 Sample Files for testing
 .env
 coverage/
 *.log
 *.pyc
+__pycache__/
