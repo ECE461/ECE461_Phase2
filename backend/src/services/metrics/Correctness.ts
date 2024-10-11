@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import 'es6-promise/auto';
-import 'isomorphic-fetch';
 import * as dotenv from 'dotenv';
 import * as git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
