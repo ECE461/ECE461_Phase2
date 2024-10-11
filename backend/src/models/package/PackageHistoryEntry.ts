@@ -1,4 +1,4 @@
-import { User } from "../user/User";
+import { User } from "../authentication/User";
 import { PackageMetadata } from "./PackageMetadata";
 
 enum Action {
