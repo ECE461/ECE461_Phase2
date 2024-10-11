@@ -35,6 +35,7 @@ export class PackageQueryController {
             // Validate that the request body is an array
             if (!Array.isArray(packageQueries)) {
                 res.status(400).json(PackageQueryController.MSG_INVALID);
+                return;
             }
 
             // Call PackageService to handle business logic
